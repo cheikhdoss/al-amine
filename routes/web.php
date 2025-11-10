@@ -159,7 +159,8 @@ Route::middleware(['auth', 'role:ADMIN'])->prefix('admin')->name('admin.')->grou
     Route::resource('users', UserController::class);
     Route::get('/agendas-globaux', [AdminDashboardController::class, 'agendasGlobaux'])->name('agendas-globaux');
     Route::get('/services', [AdminDashboardController::class, 'services'])->name('services');
-    Route::get('/specialites', [AdminDashboardController::class, 'specialites'])->name('specialites');
+    Route::post('/services', [AdminDashboardController::class, 'storeService'])->name('services.store');
+    Route::delete('/services/{id}', [AdminDashboardController::class, 'destroyService'])->name('services.destroy');
     Route::get('/rapports', [AdminDashboardController::class, 'rapports'])->name('rapports');
     Route::get('/audit', [AdminDashboardController::class, 'audit'])->name('audit');
     Route::get('/rapport/activite', [AdminDashboardController::class, 'rapportActivite'])->name('rapport.activite');

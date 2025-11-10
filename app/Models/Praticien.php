@@ -8,7 +8,7 @@ class Praticien extends Model
     protected $fillable = [
         'user_id',
         'service_id',
-        'numero_ordre',
+    // 'numero_ordre' supprimé
         'tarif_consultation',
         'annees_experience',
         'biographie',
@@ -23,12 +23,6 @@ class Praticien extends Model
     public function service()
     {
         return $this->belongsTo(Service::class);
-    }
-    public function specialites()
-    {
-        return $this->belongsToMany(Specialite::class, 'praticien_specialite')
-            ->withPivot('niveau_expertise', 'est_principale')
-            ->withTimestamps();
     }
     public function demandeRdvs()
     {

@@ -155,16 +155,12 @@
                         <select name="service_id" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" :required="role === 'PRATICIEN'">
                             <option value="">Choisir un service</option>
                             @foreach($services as $service)
-                                <option value="{{ $service->id }}" @selected(old('service_id') == $service->id)>{{ $service->libelle }}</option>
+                                <option value="{{ $service->id }}" @selected(old('service_id') == $service->id)>{{ $service->nom }}</option>
                             @endforeach
                         </select>
                         @error('service_id')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
                     </div>
-                    <div>
-                        <label class="text-xs font-medium uppercase text-gray-500">Numéro d'ordre *</label>
-                        <input type="text" name="numero_ordre" value="{{ old('numero_ordre') }}" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" :required="role === 'PRATICIEN'">
-                        @error('numero_ordre')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
-                    </div>
+                    <!-- Champ Numéro d'ordre supprimé -->
                 </div>
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>

@@ -112,14 +112,14 @@
     <div class="bg-white rounded-lg shadow-sm p-6">
         <h3 class="text-xl font-bold text-gray-800 mb-4">Statistiques des RDV</h3>
         <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-            <p class="text-gray-500">Graphique des rendez-vous</p>
+            <canvas id="rdvChart"></canvas>
         </div>
     </div>
 
     <div class="bg-white rounded-lg shadow-sm p-6">
         <h3 class="text-xl font-bold text-gray-800 mb-4">Revenus mensuels</h3>
         <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-            <p class="text-gray-500">Graphique des revenus</p>
+            <canvas id="caChart"></canvas>
         </div>
     </div>
 </div>
@@ -169,5 +169,105 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Graphique des rendez-vous (modernisé)
+    const rdvCtx = document.getElementById('rdvChart').getContext('2d');
+    const rdvGradient = rdvCtx.createLinearGradient(0, 0, 0, 250);
+    rdvGradient.addColorStop(0, 'rgba(54, 162, 235, 0.4)');
+    rdvGradient.addColorStop(1, 'rgba(54, 162, 235, 0.05)');
+    const rdvChart = new Chart(rdvCtx, {
+        type: 'line',
+        data: {
+            labels: @json($rdvParMois->pluck('mois')->map(fn($mois) => \Carbon\Carbon::parse($mois)->format('M Y'))),
+            datasets: [{
+                label: 'Rendez-vous',
+                data: @json($rdvParMois->pluck('total')),
+                fill: true,
+                backgroundColor: rdvGradient,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'white',
+                pointBorderColor: 'rgba(54, 162, 235, 1)',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                tension: 0.4
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(54, 162, 235, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    borderRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#a0aec0', font: { size: 14 } }
+                },
+                y: {
+                    grid: { color: 'rgba(200,200,200,0.1)' },
+                    ticks: { color: '#a0aec0', font: { size: 14 }, beginAtZero: true }
+                }
+            }
+        }
+    });
+
+    // Graphique des revenus mensuels (modernisé)
+    const caCtx = document.getElementById('caChart').getContext('2d');
+    const caGradient = caCtx.createLinearGradient(0, 0, 0, 250);
+    caGradient.addColorStop(0, 'rgba(75, 192, 192, 0.4)');
+    caGradient.addColorStop(1, 'rgba(75, 192, 192, 0.05)');
+    const caChart = new Chart(caCtx, {
+        type: 'line',
+        data: {
+            labels: @json($caParMois->pluck('mois')->map(fn($mois) => \Carbon\Carbon::parse($mois)->format('M Y'))),
+            datasets: [{
+                label: 'Revenus',
+                data: @json($caParMois->pluck('total')),
+                fill: true,
+                backgroundColor: caGradient,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'white',
+                pointBorderColor: 'rgba(75, 192, 192, 1)',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                tension: 0.4
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(75, 192, 192, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    borderRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#a0aec0', font: { size: 14 } }
+                },
+                y: {
+                    grid: { color: 'rgba(200,200,200,0.1)' },
+                    ticks: { color: '#a0aec0', font: { size: 14 }, beginAtZero: true }
+                }
+            }
+        }
+    });
+</script>
 @endsection
 
