@@ -115,7 +115,7 @@
 
                 <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
                     <p class="text-sm text-purple-600 mb-1">Numéro d'ordre</p>
-                    <p class="text-lg font-bold text-gray-800">{{ auth()->user()->praticien->numero_ordre }}</p>
+                    <!-- Numéro d'ordre supprimé -->
                 </div>
 
                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">

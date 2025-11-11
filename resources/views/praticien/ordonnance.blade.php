@@ -33,7 +33,7 @@
         <div class="bg-blue-50 rounded-lg p-4">
             <h3 class="text-lg font-bold text-blue-900 mb-3">Praticien</h3>
             <p class="text-sm font-semibold">{{ $consultation->praticien->user->nom_complet }}</p>
-            <p class="text-sm text-gray-600">N° Ordre: {{ $consultation->praticien->numero_ordre }}</p>
+            <!-- Numéro d'ordre supprimé -->
             <p class="text-sm text-gray-600">{{ $consultation->praticien->service->nom }}</p>
             <p class="text-sm text-gray-600">Tél: {{ $consultation->praticien->user->telephone }}</p>
         </div>

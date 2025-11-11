@@ -34,13 +34,24 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Redirect based on user role
-        return match ($user?->role) {
-            'PATIENT' => redirect()->route('patient.dashboard'),
-            'PRATICIEN' => redirect()->route('praticien.dashboard'),
-            'SECRETAIRE' => redirect()->route('secretaire.dashboard'),
-            'ADMIN' => redirect()->route('admin.dashboard'),
-            default => redirect()->route('dashboard'),
+        $redirectRoute = match ($user?->role) {
+            'ADMIN' => 'admin.dashboard',
+            'PATIENT' => 'patient.dashboard',
+            'PRATICIEN' => 'praticien.dashboard',
+            'SECRETAIRE' => 'secretaire.dashboard',
+            default => 'patient.dashboard',
         };
+
+        // Debug log (à retirer en production)
+        \Log::info("Login successful", [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'role' => $user->role,
+            'redirect_route' => $redirectRoute,
+            'redirect_url' => route($redirectRoute)
+        ]);
+
+        return redirect()->route($redirectRoute);
     }
 
     /**

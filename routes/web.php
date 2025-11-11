@@ -31,13 +31,15 @@ Route::get('/paydunya/cancel', [PaydunyaWebhookController::class, 'paymentCancel
 Route::get('/dashboard', function () {
     $user = auth()->user();
 
-    return match($user->role) {
-        'PATIENT' => redirect()->route('patient.dashboard'),
-        'PRATICIEN' => redirect()->route('praticien.dashboard'),
-        'SECRETAIRE' => redirect()->route('secretaire.dashboard'),
-        'ADMIN' => redirect()->route('admin.dashboard'),
-        default => redirect('/'),
+    $redirectRoute = match($user->role) {
+        'ADMIN' => 'admin.dashboard',
+        'PATIENT' => 'patient.dashboard',
+        'PRATICIEN' => 'praticien.dashboard',
+        'SECRETAIRE' => 'secretaire.dashboard',
+        default => 'home',
     };
+
+    return redirect()->route($redirectRoute);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Routes PATIENT
@@ -159,7 +161,8 @@ Route::middleware(['auth', 'role:ADMIN'])->prefix('admin')->name('admin.')->grou
     Route::resource('users', UserController::class);
     Route::get('/agendas-globaux', [AdminDashboardController::class, 'agendasGlobaux'])->name('agendas-globaux');
     Route::get('/services', [AdminDashboardController::class, 'services'])->name('services');
-    Route::get('/specialites', [AdminDashboardController::class, 'specialites'])->name('specialites');
+    Route::post('/services', [AdminDashboardController::class, 'storeService'])->name('services.store');
+    Route::delete('/services/{id}', [AdminDashboardController::class, 'destroyService'])->name('services.destroy');
     Route::get('/rapports', [AdminDashboardController::class, 'rapports'])->name('rapports');
     Route::get('/audit', [AdminDashboardController::class, 'audit'])->name('audit');
     Route::get('/rapport/activite', [AdminDashboardController::class, 'rapportActivite'])->name('rapport.activite');

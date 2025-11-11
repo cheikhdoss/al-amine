@@ -78,7 +78,7 @@ class UserController extends Controller
         if ($request->role === 'PRATICIEN') {
             $request->validate([
                 'service_id' => 'required|exists:services,id',
-                'numero_ordre' => 'required|string|max:255',
+                // 'numero_ordre' supprimé
                 'tarif_consultation' => 'required|numeric|min:0',
                 'annees_experience' => 'nullable|integer|min:0',
             ]);
@@ -117,7 +117,7 @@ class UserController extends Controller
                 Praticien::create([
                     'user_id' => $user->id,
                     'service_id' => $request->service_id,
-                    'numero_ordre' => $request->numero_ordre,
+                    // 'numero_ordre' supprimé
                     'tarif_consultation' => $request->tarif_consultation,
                     'annees_experience' => $request->annees_experience ?? 0,
                     'biographie' => $request->biographie,

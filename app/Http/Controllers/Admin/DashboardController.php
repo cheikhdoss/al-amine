@@ -29,25 +29,51 @@ class DashboardController extends Controller
             'montant_impaye' => Facture::where('statut', '!=', 'PAYEE')->sum('montant_restant'),
         ];
 
+        // Générer tous les mois des 6 derniers mois
+        $moisList = collect();
+        for ($i = 5; $i >= 0; $i--) {
+            $moisList->push(now()->subMonths($i)->startOfMonth());
+        }
+
         // Graphique RDV par mois (6 derniers mois)
-        $rdvParMois = RendezVous::select(
+        $rdvData = RendezVous::select(
                 DB::raw('DATE_TRUNC(\'month\', date_heure_rdv) as mois'),
                 DB::raw('COUNT(*) as total')
             )
             ->where('date_heure_rdv', '>=', now()->subMonths(6))
             ->groupBy('mois')
             ->orderBy('mois')
-            ->get();
+            ->get()
+            ->keyBy(fn($item) => \Carbon\Carbon::parse($item->mois)->format('Y-m'));
+
+        // Remplir tous les mois pour RDV
+        $rdvParMois = $moisList->map(function($mois) use ($rdvData) {
+            $key = $mois->format('Y-m');
+            return (object)[
+                'mois' => $mois->format('Y-m-d'),
+                'total' => $rdvData->has($key) ? $rdvData[$key]->total : 0
+            ];
+        });
 
         // Chiffre d'affaires par mois
-        $caParMois = Paiement::select(
+        $caData = Paiement::select(
                 DB::raw('DATE_TRUNC(\'month\', date_paiement) as mois'),
                 DB::raw('SUM(montant) as total')
             )
             ->where('date_paiement', '>=', now()->subMonths(6))
             ->groupBy('mois')
             ->orderBy('mois')
-            ->get();
+            ->get()
+            ->keyBy(fn($item) => \Carbon\Carbon::parse($item->mois)->format('Y-m'));
+
+        // Remplir tous les mois pour CA
+        $caParMois = $moisList->map(function($mois) use ($caData) {
+            $key = $mois->format('Y-m');
+            return (object)[
+                'mois' => $mois->format('Y-m-d'),
+                'total' => $caData->has($key) ? $caData[$key]->total : 0
+            ];
+        });
 
         // Dernières activités
         $dernieresActivites = AuditTrail::with('user')
@@ -73,6 +99,37 @@ class DashboardController extends Controller
         $services = \App\Models\Service::with('praticiens.user')->get();
 
         return view('admin.services', compact('services'));
+    }
+
+    public function storeService(Request $request)
+    {
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'localisation' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        \App\Models\Service::create([
+            'nom' => $request->nom,
+            'localisation' => $request->localisation,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->route('admin.services')->with('success', 'Service créé avec succès !');
+    }
+
+    public function destroyService($id)
+    {
+        $service = \App\Models\Service::findOrFail($id);
+        
+        // Vérifier qu'il n'y a pas de praticiens associés
+        if ($service->praticiens()->count() > 0) {
+            return redirect()->route('admin.services')->with('error', 'Impossible de supprimer un service avec des praticiens associés.');
+        }
+
+        $service->delete();
+
+        return redirect()->route('admin.services')->with('success', 'Service supprimé avec succès !');
     }
 
     public function specialites()

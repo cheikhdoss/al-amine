@@ -102,7 +102,7 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Numéro d'ordre</p>
-                            <p class="text-base font-medium text-gray-900">{{ $user->praticien->numero_ordre ?? '—' }}</p>
+                            <!-- Numéro d'ordre supprimé -->
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Tarif consultation</p>

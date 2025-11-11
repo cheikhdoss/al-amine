@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('service_id')->constrained()->onDelete('restrict');
-            $table->string('numero_ordre')->unique();
+            // $table->string('numero_ordre')->unique(); // supprimé
             $table->decimal('tarif_consultation', 10, 2);
             $table->integer('annees_experience')->default(0);
             $table->text('biographie')->nullable();
