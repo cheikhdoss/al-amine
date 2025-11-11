@@ -8,6 +8,7 @@ class DemandeRdv extends Model
     protected $fillable = [
         'patient_id',
         'praticien_id',
+        'specialite_id',
         'date_heure_souhaitee',
         'motif',
         'statut',
@@ -31,6 +32,10 @@ class DemandeRdv extends Model
     public function praticien()
     {
         return $this->belongsTo(Praticien::class);
+    }
+    public function specialite()
+    {
+        return $this->belongsTo(Specialite::class);
     }
     public function traitePar()
     {

@@ -51,7 +51,7 @@ class DashboardController extends Controller
             ->get();
 
         // Demandes de RDV en attente
-        $demandesRdv = DemandeRdv::with(['patient.user', 'specialite'])
+        $demandesRdv = DemandeRdv::with(['patient.user', 'praticien.user'])
             ->where('praticien_id', $praticien->id)
             ->where('statut', 'EN_ATTENTE')
             ->orderBy('created_at', 'desc')

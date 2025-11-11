@@ -31,13 +31,15 @@ Route::get('/paydunya/cancel', [PaydunyaWebhookController::class, 'paymentCancel
 Route::get('/dashboard', function () {
     $user = auth()->user();
 
-    return match($user->role) {
-        'PATIENT' => redirect()->route('patient.dashboard'),
-        'PRATICIEN' => redirect()->route('praticien.dashboard'),
-        'SECRETAIRE' => redirect()->route('secretaire.dashboard'),
-        'ADMIN' => redirect()->route('admin.dashboard'),
-        default => redirect('/'),
+    $redirectRoute = match($user->role) {
+        'ADMIN' => 'admin.dashboard',
+        'PATIENT' => 'patient.dashboard',
+        'PRATICIEN' => 'praticien.dashboard',
+        'SECRETAIRE' => 'secretaire.dashboard',
+        default => 'home',
     };
+
+    return redirect()->route($redirectRoute);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Routes PATIENT

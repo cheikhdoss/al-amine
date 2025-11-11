@@ -44,4 +44,11 @@ class Praticien extends Model
     {
         return $this->hasMany(Disponibilite::class);
     }
+
+    public function specialites()
+    {
+        return $this->belongsToMany(Specialite::class, 'praticien_specialite')
+            ->withPivot('niveau_expertise', 'est_principale')
+            ->withTimestamps();
+    }
 }
