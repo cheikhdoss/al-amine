@@ -45,4 +45,9 @@ class DemandeRdv extends Model
     {
         return $this->hasOne(RendezVous::class);
     }
+
+    public function paiements()
+    {
+        return $this->hasMany(Paiement::class, 'demande_rdv_id');
+    }
 }

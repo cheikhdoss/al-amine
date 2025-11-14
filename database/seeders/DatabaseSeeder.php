@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             SpecialiteSeeder::class,
             ServiceSeeder::class,
             UserSeeder::class,
+            ReminderTemplateSeeder::class,
         ]);
     }
 }

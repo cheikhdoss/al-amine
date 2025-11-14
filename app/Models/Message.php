@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Message extends Model
 {
     protected $fillable = [
+        'conversation_id',
         'expediteur_id',
         'destinataire_id',
         'rendez_vous_id',
+        'type',
         'contenu',
         'fichier',
         'lu',
@@ -19,9 +21,15 @@ class Message extends Model
     protected $casts = [
         'lu' => 'boolean',
         'lu_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 
     // Relations
+    public function conversation()
+    {
+        return $this->belongsTo(Conversation::class);
+    }
+
     public function expediteur()
     {
         return $this->belongsTo(User::class, 'expediteur_id');
@@ -50,5 +58,10 @@ class Message extends Model
     public function scopeNonLus($query)
     {
         return $query->where('lu', false);
+    }
+
+    public function scopeForConversation($query, int $conversationId)
+    {
+        return $query->where('conversation_id', $conversationId);
     }
 }

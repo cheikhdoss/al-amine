@@ -6,11 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Praticien;
 use App\Models\User;
+use App\Services\ChatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class MessagerieController extends Controller
 {
+    public function __construct(private ChatService $chatService)
+    {
+    }
+
     public function index()
     {
         $userId = auth()->id();
@@ -43,19 +48,24 @@ class MessagerieController extends Controller
     {
         $userId = auth()->id();
         
+        // Récupérer la conversation chat (praticien ↔ patient)
+        $conversation = $this->chatService->getOrCreateOneToOne($userId, $praticien->id);
+
         // Récupérer tous les messages de la conversation
-        $messages = Message::conversation($userId, $praticien->id)
+        $messages = Message::query()
+            ->where('conversation_id', $conversation->id)
             ->with(['expediteur', 'destinataire'])
             ->orderBy('created_at', 'asc')
             ->get();
 
         // Marquer les messages reçus comme lus
-        Message::where('expediteur_id', $praticien->id)
+        Message::where('conversation_id', $conversation->id)
+            ->where('expediteur_id', $praticien->id)
             ->where('destinataire_id', $userId)
             ->where('lu', false)
             ->update(['lu' => true, 'lu_at' => now()]);
 
-        return view('patient.messagerie.conversation', compact('praticien', 'messages'));
+        return view('patient.messagerie.conversation', compact('praticien', 'messages', 'conversation'));
     }
 
     public function store(Request $request, User $praticien)
@@ -70,12 +80,18 @@ class MessagerieController extends Controller
             $fichierPath = $request->file('fichier')->store('messages', 'public');
         }
 
+        $userId = auth()->id();
+        $conversation = $this->chatService->getOrCreateOneToOne($userId, $praticien->id);
+
         Message::create([
-            'expediteur_id' => auth()->id(),
+            'conversation_id' => $conversation->id,
+            'expediteur_id' => $userId,
             'destinataire_id' => $praticien->id,
             'contenu' => $validated['contenu'],
             'fichier' => $fichierPath,
         ]);
+
+        $conversation->touch();
 
         return back()->with('success', 'Message envoyé avec succès');
     }
@@ -95,7 +111,10 @@ class MessagerieController extends Controller
     {
         $userId = auth()->id();
         
-        $messages = Message::conversation($userId, $praticien->id)
+        $conversation = $this->chatService->getOrCreateOneToOne($userId, $praticien->id);
+
+        $messages = Message::query()
+            ->where('conversation_id', $conversation->id)
             ->with(['expediteur'])
             ->orderBy('created_at', 'desc')
             ->take(50)

@@ -34,6 +34,11 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        // Redirection selon le rôle
+        if ($request->user()->role === 'SECRETAIRE') {
+            return Redirect::route('secretaire.profile')->with('status', 'profile-updated');
+        }
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
