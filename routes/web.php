@@ -29,6 +29,9 @@ Route::post('/paydunya/ipn', [PaydunyaWebhookController::class, 'handleIPN'])->n
 Route::get('/paydunya/return', [PaydunyaWebhookController::class, 'paymentReturn'])->name('paydunya.return');
 Route::get('/paydunya/cancel', [PaydunyaWebhookController::class, 'paymentCancel'])->name('paydunya.cancel');
 
+// Route de test webhook Stripe (à supprimer en production)
+require __DIR__.'/test-webhook.php';
+
 // Redirection après login selon le rôle
 Route::get('/dashboard', function () {
     $user = auth()->user();
@@ -90,12 +93,16 @@ Route::middleware(['auth', 'role:PATIENT'])->prefix('patient')->name('patient.')
     Route::post('/paiement/{facture}', [PatientDashboardController::class, 'traiterPaiement'])->name('paiement.traiter');
     
     // Messagerie
-    Route::get('/messagerie', [\App\Http\Controllers\Patient\MessagerieController::class, 'index'])->name('messagerie.index');
-    Route::get('/messagerie/nouveau', [\App\Http\Controllers\Patient\MessagerieController::class, 'nouveauMessage'])->name('messagerie.nouveau');
-    Route::get('/messagerie/{praticien}', [\App\Http\Controllers\Patient\MessagerieController::class, 'show'])->name('messagerie.show');
-    Route::post('/messagerie/{praticien}', [\App\Http\Controllers\Patient\MessagerieController::class, 'store'])->name('messagerie.store');
-    Route::get('/messagerie/{praticien}/messages', [\App\Http\Controllers\Patient\MessagerieController::class, 'getMessages'])->name('messagerie.messages');
-    
+    Route::get('/messagerie', [\App\Http\Controllers\Patient\ChatController::class, 'index'])->name('messagerie.index');
+    Route::prefix('messagerie')->name('messagerie.')->group(function () {
+        Route::get('/conversations', [\App\Http\Controllers\Patient\ChatController::class, 'conversations'])->name('conversations');
+        Route::post('/conversations', [\App\Http\Controllers\Patient\ChatController::class, 'storeConversation'])->name('conversations.store');
+        Route::get('/conversations/{conversation}', [\App\Http\Controllers\Patient\ChatController::class, 'show'])->name('conversations.show');
+        Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Patient\ChatController::class, 'storeMessage'])->name('conversations.messages.store');
+        Route::post('/conversations/{conversation}/read', [\App\Http\Controllers\Patient\ChatController::class, 'markAsRead'])->name('conversations.read');
+        Route::post('/conversations/{conversation}/archive', [\App\Http\Controllers\Patient\ChatController::class, 'archive'])->name('conversations.archive');
+    });
+
     // Calendrier
     Route::get('/calendrier', [\App\Http\Controllers\Patient\CalendrierController::class, 'index'])->name('calendrier');
     Route::get('/calendrier/events', [\App\Http\Controllers\Patient\CalendrierController::class, 'getEvents'])->name('calendrier.events');
@@ -205,3 +212,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/patient-stripe.php';

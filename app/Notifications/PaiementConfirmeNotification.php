@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Paiement;
+use Illuminate\Support\HtmlString;
 
 class PaiementConfirmeNotification extends Notification
 {
@@ -26,15 +27,20 @@ class PaiementConfirmeNotification extends Notification
 
     public function toMail($notifiable)
     {
+        $demande = $this->paiement->demandeRdv;
+
         return (new MailMessage)
-            ->subject('Paiement confirmé - Al-Amine')
-            ->greeting('Bonjour ' . $notifiable->prenom . ',')
-            ->line('Votre paiement a été confirmé avec succès !')
-            ->line('Montant payé : ' . number_format($this->paiement->montant, 0, ',', ' ') . ' FCFA')
-            ->line('Méthode : ' . $this->paiement->methode_paiement)
-            ->line('Numéro de transaction : ' . $this->paiement->numero_transaction)
-            ->action('Voir mes paiements', route('patient.paiements.index'))
-            ->line('Merci de votre confiance !');
+            ->subject('✅ Paiement confirmé - Al-Amine')
+            ->view('emails.notifications.paiement-confirme', [
+                'prenom' => $notifiable->prenom ?? $notifiable->name,
+                'paiement' => $this->paiement,
+                'montant_formate' => number_format($this->paiement->montant, 0, ',', ' ') . ' FCFA',
+                'methode' => strtoupper(str_replace('_', ' ', $this->paiement->methode_paiement)),
+                'reference' => $this->paiement->reference,
+                'transaction' => $this->paiement->numero_transaction,
+                'demande' => $demande,
+                'cta_url' => route('patient.paiements.index'),
+            ]);
     }
 
     public function toArray($notifiable)

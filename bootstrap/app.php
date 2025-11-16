@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Exclure les routes PayDunya du CSRF pour les webhooks
         $middleware->validateCsrfTokens(except: [
             'paydunya/*',
+            'patient/stripe/webhook',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

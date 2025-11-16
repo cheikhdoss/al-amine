@@ -2183,11 +2183,19 @@
         <div class="modal-content">
             <button class="close-btn" onclick="closeLoginModal()">&times;</button>
             <h2 class="modal-title">Connexion Patient</h2>
+
+            @if(session('authError'))
+                <div class="form-error" style="margin-bottom: 1rem;">{{ session('authError') }}</div>
+            @endif
+
+            @if($errors->has('email'))
+                <div class="form-error" style="margin-bottom: 1rem;">{{ $errors->first('email') }}</div>
+            @endif
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="form-group">
                     <label for="login_email">Adresse Email</label>
-                    <input type="email" id="login_email" name="email" required placeholder="votre@email.com">
+                    <input type="email" id="login_email" name="email" value="{{ old('email') }}" required placeholder="votre@email.com">
                 </div>
                 <div class="form-group">
                     <label for="login_password">Mot de passe</label>

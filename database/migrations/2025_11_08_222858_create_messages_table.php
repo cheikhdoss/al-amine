@@ -11,24 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('conversation_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignId('expediteur_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('destinataire_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('rendez_vous_id')->nullable()->constrained('rendez_vous')->nullOnDelete();
-            $table->string('type')->default('text');
-            $table->text('contenu');
-            $table->string('fichier')->nullable(); // Pour pièces jointes
-            $table->boolean('lu')->default(false);
-            $table->timestamp('lu_at')->nullable();
-            $table->timestamps();
-
-            // Index pour optimiser les requêtes
-            $table->index(['conversation_id', 'created_at']);
-            $table->index(['expediteur_id', 'destinataire_id']);
-            $table->index('rendez_vous_id');
-        });
+        // Migration remplacée par 2025_11_15_140000_reset_patient_messaging.
+        // On laisse volontairement ce fichier vide pour éviter les conflits de schéma.
     }
 
     /**
@@ -36,6 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        // Rien à faire
     }
 };

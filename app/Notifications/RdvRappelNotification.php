@@ -37,16 +37,19 @@ class RdvRappelNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $date = $this->rendezVous->date_heure_rdv->locale('fr');
+
         return (new MailMessage)
-                    ->subject('Rappel de rendez-vous - AL-AMINE')
-                    ->greeting('Bonjour ' . $this->rendezVous->patient->user->prenom . ',')
-                    ->line('Ceci est un rappel pour votre rendez-vous médical.')
-                    ->line('**Praticien:** Dr. ' . $this->rendezVous->praticien->user->nom_complet)
-                    ->line('**Date:** ' . $this->rendezVous->date_heure_rdv->locale('fr')->isoFormat('dddd D MMMM YYYY'))
-                    ->line('**Heure:** ' . $this->rendezVous->date_heure_rdv->format('H:i'))
-                    ->line('**Durée:** ' . $this->rendezVous->duree_minutes . ' minutes')
-                    ->action('Voir mon rendez-vous', route('patient.rendezvous.show', $this->rendezVous))
-                    ->line('Merci d\'utiliser AL-AMINE pour vos soins de santé.');
+                    ->subject('🔔 Rappel de rendez-vous - Al-Amine')
+                    ->view('emails.notifications.rdv-rappel', [
+                        'prenom' => $this->rendezVous->patient->user->prenom ?? $this->rendezVous->patient->user->name,
+                        'praticien' => $this->rendezVous->praticien->user->nom_complet,
+                        'date_formatee' => ucfirst($date->translatedFormat('l d F Y')),
+                        'heure_formatee' => $date->format('H\hi'),
+                        'duree' => $this->rendezVous->duree_minutes . ' minutes',
+                        'lieu' => 'Hôpital Al-Amine – Centre principal',
+                        'cta_url' => route('patient.rendezvous.show', $this->rendezVous),
+                    ]);
     }
 
     /**
@@ -64,4 +67,5 @@ class RdvRappelNotification extends Notification implements ShouldQueue
             'message' => 'Rappel: Rendez-vous demain avec Dr. ' . $this->rendezVous->praticien->user->nom_complet . ' à ' . $this->rendezVous->date_heure_rdv->format('H:i'),
         ];
     }
+
 }

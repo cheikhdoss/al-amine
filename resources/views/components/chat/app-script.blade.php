@@ -26,6 +26,7 @@
 
             init() {
                 this.sortConversations();
+                this.emitUnreadCount();
                 this.startPolling();
                 window.addEventListener('beforeunload', () => this.stopPolling());
             },
@@ -89,6 +90,7 @@
                     .then(({ data }) => {
                         this.conversations = data.conversations || [];
                         this.sortConversations();
+                        this.emitUnreadCount();
                         if (this.selectedConversation) {
                             const refreshed = this.findConversationById(this.selectedConversation.id);
                             if (refreshed) {
@@ -163,6 +165,8 @@
                         if (conversation) {
                             conversation.unread_count = 0;
                         }
+
+                        this.emitUnreadCount();
                     })
                     .catch((error) => console.error('[chatApp] Erreur rafraîchissement messages', error))
                     .finally(() => {
@@ -202,6 +206,7 @@
                         }
                         this.insertOrUpdateConversation(conversation);
                         this.selectConversation(conversation);
+                        this.emitUnreadCount();
                     })
                     .catch((error) => console.error('[chatApp] Erreur création conversation', error));
             },
@@ -235,6 +240,7 @@
                         this.$nextTick(() => this.scrollToBottom());
                         this.markConversationAsRead(conversationId);
                         this.subscribeToConversation(conversationId);
+                        this.emitUnreadCount();
                     })
                     .catch((error) => console.error('[chatApp] Erreur chargement conversation', error))
                     .finally(() => {
@@ -285,6 +291,8 @@
                     this.$nextTick(() => this.scrollToBottom());
                     this.markConversationAsRead(conversationId);
                 }
+
+                this.emitUnreadCount();
             },
 
             insertOrUpdateConversation(conversation) {
@@ -328,6 +336,7 @@
                             }
                             return message;
                         });
+                        this.emitUnreadCount();
                     })
                     .catch((error) => console.error('[chatApp] Erreur marquage lecture', error));
             },
@@ -356,6 +365,7 @@
                         this.updateConversationPreview(this.selectedConversation, message);
                         this.$nextTick(() => this.scrollToBottom());
                         this.messageContent = '';
+                        this.emitUnreadCount();
                     }
                 } catch (error) {
                     console.error('[chatApp] Erreur envoi message', error);
@@ -365,11 +375,22 @@
             },
 
             scrollToBottom() {
-                const container = this.$refs.messagesContainer;
-                if (!container) {
+                if (this.$refs.messagesContainer) {
+                    this.$refs.messagesContainer.scrollTop = this.$refs.messagesContainer.scrollHeight;
+                }
+            },
+
+            emitUnreadCount() {
+                if (!Array.isArray(this.conversations)) {
                     return;
                 }
-                container.scrollTop = container.scrollHeight;
+
+                const totalUnread = this.conversations.reduce((sum, conversation) => {
+                    return sum + (conversation.unread_count || 0);
+                }, 0);
+
+                window.__chatUnreadCount = totalUnread;
+                window.dispatchEvent(new CustomEvent('chat:unread-count-changed', { detail: totalUnread }));
             },
         }));
     });

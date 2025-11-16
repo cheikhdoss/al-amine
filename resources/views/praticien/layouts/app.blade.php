@@ -17,7 +17,11 @@
 <body class="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 font-sans min-h-screen">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gradient-to-b from-blue-950 via-blue-900 to-blue-950 text-white flex-shrink-0 hidden lg:flex flex-col shadow-2xl">
+        <aside
+            x-data="{ unreadMessagesCount: window.__chatUnreadCount ?? 0, updateUnreadCount(count) { this.unreadMessagesCount = count; } }"
+            x-init="window.addEventListener('chat:unread-count-changed', (event) => updateUnreadCount(event.detail));"
+            class="w-64 bg-gradient-to-b from-blue-950 via-blue-900 to-blue-950 text-white flex-shrink-0 hidden lg:flex flex-col shadow-2xl"
+        >
             <!-- Logo/Header -->
             <div class="p-6 border-b border-blue-800/60">
                 <div class="flex items-center gap-3">
@@ -68,11 +72,17 @@
                     <span class="font-medium">Consultations</span>
                 </a>
 
-                <a href="{{ route('praticien.messages.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition {{ request()->routeIs('praticien.messages.*') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                <a href="{{ route('praticien.messages.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition {{ request()->routeIs('praticien.messages.*') ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
+                   :class="!('{{ request()->routeIs('praticien.messages.*') }}') && unreadMessagesCount > 0 ? 'bg-indigo-700/30 text-white' : ''"
+                >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v7a2 2 0 01-2 2h-4l-4 4v-4z"></path>
                     </svg>
-                    <span class="font-medium">Messages</span>
+                    <span class="font-medium relative flex items-center gap-2">
+                        Messages
+                        <span x-show="unreadMessagesCount > 0" x-text="unreadMessagesCount" class="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white"></span>
+                    </span>
                 </a>
 
                 {{-- Future messaging module --}}

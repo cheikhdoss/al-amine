@@ -44,8 +44,11 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            session()->flash('openLogin', true);
+            session()->flash('authError', 'Compte non trouvé. Vérifiez vos identifiants.');
+
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => 'Compte non trouvé. Vérifiez vos identifiants.',
             ]);
         }
 

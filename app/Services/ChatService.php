@@ -18,7 +18,11 @@ class ChatService
         return Conversation::query()
             ->whereHas('participants', fn ($q) => $q->where('user_id', $userId))
             ->with(['participants.user', 'messages' => fn ($q) => $q->latest()->limit(1)])
-            ->withCount(['messages as unread_count' => fn ($q) => $q->where('destinataire_id', $userId)->where('lu', false)])
+            ->withCount([
+                'messages as unread_count' => fn ($q) => $q
+                    ->whereNull('read_at')
+                    ->where('sender_id', '<>', $userId),
+            ])
             ->orderByDesc('updated_at')
             ->get()
             ->map(fn (Conversation $conversation) => $this->formatConversation($conversation, $userId));
@@ -31,18 +35,28 @@ class ChatService
         }
 
         $conversation = Conversation::query()
-            ->where('type', Conversation::TYPE_ONE_TO_ONE)
             ->whereHas('participants', fn ($q) => $q->where('user_id', $userIdA))
             ->whereHas('participants', fn ($q) => $q->where('user_id', $userIdB))
             ->first();
 
         if (!$conversation) {
-            $conversation = Conversation::create([
-                'type' => Conversation::TYPE_ONE_TO_ONE,
-            ]);
+            $conversation = Conversation::create();
 
-            $conversation->addParticipant($userIdA);
-            $conversation->addParticipant($userIdB);
+            $participants = User::query()
+                ->whereIn('id', [$userIdA, $userIdB])
+                ->get()
+                ->keyBy('id');
+
+            $conversation->participants()->createMany([
+                [
+                    'user_id' => $userIdA,
+                    'role' => $participants[$userIdA]->role ?? null,
+                ],
+                [
+                    'user_id' => $userIdB,
+                    'role' => $participants[$userIdB]->role ?? null,
+                ],
+            ]);
         }
 
         return $conversation->fresh(['participants.user']);
@@ -58,7 +72,7 @@ class ChatService
     public function conversationMessages(Conversation $conversation, int $userId, int $perPage = 50): Paginator
     {
         return $conversation->messages()
-            ->with(['expediteur:id,prenom,name', 'destinataire:id,prenom,name'])
+            ->with(['sender:id,prenom,name'])
             ->orderBy('created_at')
             ->paginate($perPage)
             ->through(fn (Message $message) => $this->formatMessage($message, $userId));
@@ -67,23 +81,16 @@ class ChatService
     public function sendMessage(Conversation $conversation, int $senderId, string $content, string $type = 'text'): array
     {
         $conversation->loadMissing(['participants']);
-        $recipient = $conversation->otherParticipant($senderId);
-
-        if (!$recipient) {
-            throw new \RuntimeException('Destinataire introuvable pour cette conversation.');
-        }
 
         $message = $conversation->messages()->create([
-            'expediteur_id' => $senderId,
-            'destinataire_id' => $recipient->id,
+            'sender_id' => $senderId,
             'type' => $type,
-            'contenu' => $content,
-            'lu' => false,
+            'content' => $content,
         ]);
 
         $conversation->touch();
 
-        broadcast(new ConversationMessageSent($conversation->id, $this->formatMessage($message->fresh(['expediteur']), $senderId)))->toOthers();
+        broadcast(new ConversationMessageSent($conversation->id, $this->formatMessage($message->fresh(['sender']), $senderId)))->toOthers();
 
         return $this->formatMessage($message, $senderId);
     }
@@ -92,27 +99,27 @@ class ChatService
     {
         $conversation->participants()
             ->where('user_id', $userId)
-            ->update(['last_read_at' => Carbon::now()]);
+            ->update([
+                'last_read_at' => Carbon::now(),
+            ]);
 
         $conversation->messages()
-            ->where('destinataire_id', $userId)
-            ->where('lu', false)
-            ->update([
-                'lu' => true,
-                'lu_at' => Carbon::now(),
-            ]);
+            ->whereNull('read_at')
+            ->where('sender_id', '<>', $userId)
+            ->update(['read_at' => Carbon::now()]);
     }
 
     public function formatConversation(Conversation $conversation, int $userId): array
     {
         $conversation->loadMissing(['participants.user', 'messages' => fn ($q) => $q->latest()->limit(1)]);
 
-        $otherUser = $conversation->otherParticipant($userId);
+        $otherParticipant = $conversation->participants
+            ->firstWhere('user_id', '<>', $userId);
+        $otherUser = $otherParticipant?->user;
         $lastMessage = $conversation->messages->first();
 
         return [
             'id' => $conversation->id,
-            'type' => $conversation->type,
             'subject' => $conversation->subject,
             'other_user' => $otherUser ? [
                 'id' => $otherUser->id,
@@ -127,10 +134,7 @@ class ChatService
                 },
             ] : null,
             'last_message' => $lastMessage ? $this->formatMessage($lastMessage, $userId) : null,
-            'unread_count' => $conversation->unread_count ?? $conversation->messages()
-                ->where('destinataire_id', $userId)
-                ->where('lu', false)
-                ->count(),
+            'unread_count' => $conversation->unread_count ?? 0,
             'updated_at' => $conversation->updated_at?->toIso8601String(),
         ];
     }
@@ -140,12 +144,11 @@ class ChatService
         return [
             'id' => $message->id,
             'conversation_id' => $message->conversation_id,
-            'sender_id' => $message->expediteur_id,
-            'recipient_id' => $message->destinataire_id,
+            'sender_id' => $message->sender_id,
             'type' => $message->type,
-            'content' => $message->contenu,
-            'is_mine' => $message->expediteur_id === $currentUserId,
-            'read' => $message->lu,
+            'content' => $message->content,
+            'is_mine' => $message->sender_id === $currentUserId,
+            'read_at' => $message->read_at?->toIso8601String(),
             'created_at' => $message->created_at?->toIso8601String(),
             'time_for_humans' => $message->created_at?->format('d/m/Y H:i'),
         ];

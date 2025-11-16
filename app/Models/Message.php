@@ -8,60 +8,55 @@ class Message extends Model
 {
     protected $fillable = [
         'conversation_id',
-        'expediteur_id',
-        'destinataire_id',
-        'rendez_vous_id',
+        'sender_id',
         'type',
-        'contenu',
-        'fichier',
-        'lu',
-        'lu_at',
+        'content',
+        'metadata',
+        'read_at',
     ];
 
     protected $casts = [
-        'lu' => 'boolean',
-        'lu_at' => 'datetime',
+        'metadata' => 'array',
+        'read_at' => 'datetime',
         'created_at' => 'datetime',
     ];
 
-    // Relations
     public function conversation()
     {
         return $this->belongsTo(Conversation::class);
     }
 
-    public function expediteur()
+    public function sender()
     {
-        return $this->belongsTo(User::class, 'expediteur_id');
+        return $this->belongsTo(User::class, 'sender_id');
     }
 
-    public function destinataire()
+    public function attachments()
     {
-        return $this->belongsTo(User::class, 'destinataire_id');
-    }
-
-    public function rendezVous()
-    {
-        return $this->belongsTo(RendezVous::class, 'rendez_vous_id');
-    }
-
-    // Scopes
-    public function scopeConversation($query, $userId1, $userId2)
-    {
-        return $query->where(function ($q) use ($userId1, $userId2) {
-            $q->where('expediteur_id', $userId1)->where('destinataire_id', $userId2);
-        })->orWhere(function ($q) use ($userId1, $userId2) {
-            $q->where('expediteur_id', $userId2)->where('destinataire_id', $userId1);
-        });
-    }
-
-    public function scopeNonLus($query)
-    {
-        return $query->where('lu', false);
+        return $this->hasMany(MessageAttachment::class);
     }
 
     public function scopeForConversation($query, int $conversationId)
     {
         return $query->where('conversation_id', $conversationId);
+    }
+
+    public function scopeUnread($query)
+    {
+        return $query->whereNull('read_at');
+    }
+
+    public function markAsRead(): void
+    {
+        if ($this->read_at) {
+            return;
+        }
+
+        $this->forceFill(['read_at' => now()])->save();
+    }
+
+    public function addAttachment(array $attributes): MessageAttachment
+    {
+        return $this->attachments()->create($attributes);
     }
 }

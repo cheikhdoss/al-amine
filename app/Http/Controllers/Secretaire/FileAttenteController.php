@@ -25,6 +25,7 @@ class FileAttenteController extends Controller
         // Filtrer pour afficher les demandes:
         // 1. Payées en ligne (paiement CONFIRME)
         // 2. Paiement sur place (pas de paiement ou paiement EN_ATTENTE)
+        // 3. Statut PAYEE (paiement effectué)
         $query->where(function ($q) {
             // Cas 1: Paiement en ligne confirmé
             $q->whereHas('paiements', function ($subQ) {
@@ -33,11 +34,17 @@ class FileAttenteController extends Controller
             // Cas 2: Paiement sur place (pas de paiement confirmé)
             ->orWhereDoesntHave('paiements', function ($subQ) {
                 $subQ->where('statut', 'CONFIRME');
-            });
+            })
+            // Cas 3: Statut PAYEE (paiement effectué)
+            ->orWhere('statut', 'PAYEE');
         });
 
         if ($statut && $statut !== 'TOUS') {
-            $query->where('statut', $statut);
+            if ($statut === 'EN_ATTENTE') {
+                $query->whereIn('statut', ['EN_ATTENTE', 'PAYEE']);
+            } else {
+                $query->where('statut', $statut);
+            }
         }
 
         $demandes = $query->paginate(10)->withQueryString();
@@ -88,7 +95,7 @@ class FileAttenteController extends Controller
         });
 
         $stats = [
-            'EN_ATTENTE' => (clone $statsQuery)->where('statut', 'EN_ATTENTE')->count(),
+            'EN_ATTENTE' => (clone $statsQuery)->whereIn('statut', ['EN_ATTENTE', 'PAYEE'])->count(),
             'CONFIRMEE' => (clone $statsQuery)->where('statut', 'CONFIRMEE')->count(),
             'REFUSEE' => (clone $statsQuery)->where('statut', 'REFUSEE')->count(),
         ];
@@ -147,6 +154,9 @@ class FileAttenteController extends Controller
             'traite_par' => auth()->user()->secretaire->id,
             'date_traitement' => now(),
         ]);
+
+        $demandeRdv->setRelation('rendezVous', $rendezVous);
+        $demandeRdv->loadMissing(['patient.user', 'praticien.user']);
 
         // Envoyer une notification au patient
         $demandeRdv->patient->user->notify(new \App\Notifications\DemandeRdvStatusNotification($demandeRdv, 'validee'));

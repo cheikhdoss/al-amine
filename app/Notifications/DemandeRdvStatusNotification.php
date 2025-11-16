@@ -39,26 +39,22 @@ class DemandeRdvStatusNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $message = (new MailMessage)
-                    ->subject($this->getSubject())
-                    ->greeting('Bonjour ' . $this->demandeRdv->patient->user->prenom . ',');
+        $rendezVous = $this->demandeRdv->rendezVous;
+        $dateProgramme = $rendezVous?->date_heure_rdv ?? $this->demandeRdv->date_heure_souhaitee;
+        $formattedDate = $dateProgramme ? $dateProgramme->locale('fr')->translatedFormat('l d F Y') : 'À confirmer';
+        $formattedHeure = $dateProgramme ? $dateProgramme->format('H\hi') : '—';
 
-        if ($this->status === 'validee') {
-            $message->line('Bonne nouvelle! Votre demande de rendez-vous a été **acceptée**.')
-                    ->line('**Praticien:** Dr. ' . $this->demandeRdv->praticien->user->nom_complet)
-                    ->line('**Date souhaitée:** ' . $this->demandeRdv->date_souhaitee->locale('fr')->isoFormat('dddd D MMMM YYYY'))
-                    ->line('**Heure:** ' . $this->demandeRdv->heure_souhaitee)
-                    ->action('Voir mes rendez-vous', route('patient.mes-rdv'))
-                    ->line('Nous vous rappelons d\'arriver 10 minutes avant l\'heure de votre rendez-vous.');
-        } else {
-            $message->line('Votre demande de rendez-vous a été **refusée**.')
-                    ->line('**Praticien:** Dr. ' . $this->demandeRdv->praticien->user->nom_complet)
-                    ->line('**Date demandée:** ' . $this->demandeRdv->date_souhaitee->locale('fr')->isoFormat('dddd D MMMM YYYY'))
-                    ->action('Faire une nouvelle demande', route('patient.demander-rdv'))
-                    ->line('N\'hésitez pas à proposer d\'autres créneaux horaires.');
-        }
-
-        return $message->line('Merci d\'utiliser AL-AMINE.');
+        return (new MailMessage)
+            ->subject($this->getSubject())
+            ->view('emails.notifications.demande-rdv-status', [
+                'prenom' => $this->demandeRdv->patient->user->prenom ?? $this->demandeRdv->patient->user->name,
+                'status' => $this->status,
+                'praticien' => $this->demandeRdv->praticien->user->nom_complet,
+                'date_formatee' => ucfirst($formattedDate),
+                'heure_formatee' => $formattedHeure,
+                'lieu' => 'Hôpital Al-Amine – Centre principal',
+                'cta_url' => $this->status === 'validee' ? route('patient.mes-rdv') : route('patient.demander-rdv'),
+            ]);
     }
 
     /**
@@ -73,8 +69,9 @@ class DemandeRdvStatusNotification extends Notification implements ShouldQueue
             'demande_rdv_id' => $this->demandeRdv->id,
             'status' => $this->status,
             'praticien_nom' => $this->demandeRdv->praticien->user->nom_complet,
+            'date_programmee' => optional($this->demandeRdv->rendezVous?->date_heure_rdv ?? $this->demandeRdv->date_heure_souhaitee)->format('Y-m-d H:i:s'),
             'message' => $this->status === 'validee' 
-                ? 'Votre demande de RDV avec Dr. ' . $this->demandeRdv->praticien->user->nom_complet . ' a été acceptée'
+                ? 'Votre rendez-vous avec Dr. ' . $this->demandeRdv->praticien->user->nom_complet . ' est confirmé le ' . optional($this->demandeRdv->rendezVous?->date_heure_rdv)->format('d/m/Y à H\hi')
                 : 'Votre demande de RDV avec Dr. ' . $this->demandeRdv->praticien->user->nom_complet . ' a été refusée',
         ];
     }
@@ -82,7 +79,7 @@ class DemandeRdvStatusNotification extends Notification implements ShouldQueue
     private function getSubject(): string
     {
         return $this->status === 'validee' 
-            ? 'Demande de rendez-vous acceptée - AL-AMINE'
-            : 'Demande de rendez-vous refusée - AL-AMINE';
+            ? 'Demande de rendez-vous acceptée - Al-Amine'
+            : 'Demande de rendez-vous refusée - Al-Amine';
     }
 }

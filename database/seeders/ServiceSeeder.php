@@ -11,19 +11,29 @@ class ServiceSeeder extends Seeder
     {
         $services = [
             [
-                'nom' => 'Médecine Interne',
+                'nom' => 'Médecine Générale',
                 'localisation' => 'Bâtiment A - 1er étage',
-                'description' => 'Service de médecine générale et spécialisée',
-            ],
-            [
-                'nom' => 'Pédiatrie',
-                'localisation' => 'Bâtiment B - Rez-de-chaussée',
-                'description' => 'Service dédié aux soins des enfants',
+                'description' => 'Consultations de médecine générale et suivi des patients chroniques',
             ],
             [
                 'nom' => 'Cardiologie',
                 'localisation' => 'Bâtiment A - 2ème étage',
-                'description' => 'Service spécialisé dans les pathologies cardiaques',
+                'description' => 'Prise en charge complète des pathologies cardiaques',
+            ],
+            [
+                'nom' => 'Pédiatrie',
+                'localisation' => 'Bâtiment B - Rez-de-chaussée',
+                'description' => 'Service dédié aux enfants et adolescents',
+            ],
+            [
+                'nom' => 'Gynécologie-Obstétrique',
+                'localisation' => 'Bâtiment C - 1er étage',
+                'description' => 'Suivi de la santé de la femme et maternité',
+            ],
+            [
+                'nom' => 'Dermatologie',
+                'localisation' => 'Bâtiment C - Rez-de-chaussée',
+                'description' => 'Diagnostic et traitement des maladies de peau',
             ],
         ];
 

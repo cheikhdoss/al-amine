@@ -119,7 +119,7 @@ class PaydunyaWebhookController extends Controller
 
                 // Paiement réussi
                 $paiement->update([
-                    'statut' => 'PAYE',
+                    'statut' => 'CONFIRME',
                     'numero_transaction' => $transactionId,
                     'date_paiement' => now()
                 ]);
@@ -137,13 +137,13 @@ class PaydunyaWebhookController extends Controller
                     $demandeRdv = DemandeRdv::find($demandeRdvId);
                     if ($demandeRdv) {
                         $demandeRdv->update([
-                            'statut' => 'EN_ATTENTE', // Passe de EN_ATTENTE_PAIEMENT à EN_ATTENTE (attente de validation par la secrétaire)
+                            'statut' => 'PAYEE',
                             'paiement_effectue' => true
                         ]);
                         
                         Log::info('PayDunya IPN: Demande RDV mise à jour', [
                             'demande_rdv_id' => $demandeRdvId,
-                            'nouveau_statut' => 'EN_ATTENTE'
+                            'nouveau_statut' => 'PAYEE'
                         ]);
                     }
                 }

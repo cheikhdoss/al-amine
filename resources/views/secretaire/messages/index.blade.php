@@ -79,7 +79,10 @@
                                 <p class="mt-1 truncate text-xs text-gray-500" x-text="conversation.last_message?.content ?? 'Aucun message pour le moment.'"></p>
                                 <div class="mt-2 flex items-center gap-2">
                                     <span x-show="conversation.unread_count > 0" class="inline-flex items-center justify-center rounded-full bg-blue-600 px-2 text-[11px] font-semibold text-white" x-text="conversation.unread_count"></span>
-                                    <span x-show="conversation.last_message && !conversation.unread_count" class="text-[11px] text-gray-400" x-text="conversation.last_message.read ? 'Lu' : ''"></span>
+                                    <span
+                                        x-show="conversation.last_message && !conversation.unread_count && conversation.last_message.read_at"
+                                        class="text-[11px] text-gray-400"
+                                    >Lu</span>
                                 </div>
                             </div>
                         </div>

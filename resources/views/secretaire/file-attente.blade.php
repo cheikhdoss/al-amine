@@ -188,11 +188,13 @@
                                         </span>
                                         <span class="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold
                                             @if($demande->statut === 'EN_ATTENTE') bg-yellow-100 text-yellow-800 border border-yellow-300
+                                            @elseif($demande->statut === 'PAYEE') bg-blue-100 text-blue-800 border border-blue-300
                                             @elseif($demande->statut === 'CONFIRMEE') bg-green-100 text-green-800 border border-green-300
                                             @elseif($demande->statut === 'REFUSEE') bg-red-100 text-red-800 border border-red-300
                                             @else bg-gray-100 text-gray-800 border border-gray-300
                                             @endif">
                                             @if($demande->statut === 'EN_ATTENTE') ⏳ En attente
+                                            @elseif($demande->statut === 'PAYEE') ✅ Payé
                                             @elseif($demande->statut === 'CONFIRMEE') ✓ Confirmée
                                             @elseif($demande->statut === 'REFUSEE') ✕ Refusée
                                             @else {{ $demande->statut }}
@@ -206,7 +208,7 @@
                             </div>
 
                             <div class="flex flex-wrap gap-2">
-                                @if($demande->statut === 'EN_ATTENTE')
+                                @if($demande->statut === 'EN_ATTENTE' || $demande->statut === 'PAYEE')
                                 <button type="button" @click="toggleConfirm()" class="px-5 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -223,7 +225,7 @@
                             </div>
                         </div>
 
-                        @if($demande->statut === 'EN_ATTENTE')
+                        @if($demande->statut === 'EN_ATTENTE' || $demande->statut === 'PAYEE')
                         <div x-show="openConfirm" x-cloak class="bg-white border border-green-100 rounded-xl p-5 shadow-inner">
                             <h5 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
                                 <span class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center">📅</span>

@@ -10,11 +10,8 @@ class Conversation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'type',
         'subject',
     ];
-
-    public const TYPE_ONE_TO_ONE = 'one_to_one';
 
     public function participants()
     {
@@ -24,7 +21,7 @@ class Conversation extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'conversation_participants')
-            ->withPivot(['role', 'last_read_at'])
+            ->withPivot(['role', 'last_read_at', 'muted_at'])
             ->withTimestamps();
     }
 
@@ -33,26 +30,28 @@ class Conversation extends Model
         return $this->hasMany(Message::class)->orderBy('created_at');
     }
 
-    public function addParticipant(int $userId, ?string $role = null): ConversationParticipant
+    public function scopeForUser($query, int $userId)
     {
-        return $this->participants()->firstOrCreate([
-            'user_id' => $userId,
-        ], [
-            'role' => $role,
-        ]);
+        return $query->whereHas('participants', fn ($q) => $q->where('user_id', $userId));
     }
 
-    public function otherParticipant(int $userId): ?User
+    public function scopeWithParticipantStatus($query, int $userId, ?bool $archived = null)
     {
-        return $this->users()->where('users.id', '<>', $userId)->first();
-    }
-
-    public function scopeBetweenUsers($query, int $userA, int $userB)
-    {
-        return $query->whereHas('participants', function ($q) use ($userA) {
-            $q->where('user_id', $userA);
-        })->whereHas('participants', function ($q) use ($userB) {
-            $q->where('user_id', $userB);
+        return $query->whereHas('participants', function ($q) use ($userId, $archived) {
+            $q->where('user_id', $userId)
+                ->when(!is_null($archived), fn ($inner) => $archived
+                    ? $inner->whereNotNull('archived_at')
+                    : $inner->whereNull('archived_at'));
         });
+    }
+
+    public function participantFor(int $userId): ?ConversationParticipant
+    {
+        return $this->participants()->where('user_id', $userId)->first();
+    }
+
+    public function otherParticipant(int $userId): ?ConversationParticipant
+    {
+        return $this->participants()->where('user_id', '<>', $userId)->first();
     }
 }
