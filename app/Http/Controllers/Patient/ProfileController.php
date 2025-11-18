@@ -36,7 +36,7 @@ class ProfileController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('patient.profile.edit')
+        return redirect()->route('patient.dashboard')
             ->with('success', 'Informations personnelles mises à jour avec succès.');
     }
 
@@ -61,7 +61,7 @@ class ProfileController extends Controller
 
         $patient->update($validated);
 
-        return redirect()->route('patient.profile.edit')
+        return redirect()->route('patient.dashboard')
             ->with('success', 'Informations de santé mises à jour avec succès.');
     }
 
@@ -77,7 +77,7 @@ class ProfileController extends Controller
 
         $patient->update($validated);
 
-        return redirect()->route('patient.profile.edit')
+        return redirect()->route('patient.dashboard')
             ->with('success', 'Informations d\'assurance mises à jour avec succès.');
     }
 

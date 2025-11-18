@@ -2207,6 +2207,11 @@
                     <label for="login_password">Mot de passe</label>
                     <input type="password" id="login_password" name="password" required placeholder="••••••••">
                 </div>
+                <div class="form-group" style="text-align:right;margin-top:-0.5rem;margin-bottom:1rem;">
+                    <a href="{{ route('password.request') }}" style="font-size:0.875rem;color:#3B82F6;text-decoration:none;">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Se Connecter</button>
                 <div class="modal-footer">
                     <p>Pas de compte? <a onclick="switchToRegister()">Créer un compte</a></p>

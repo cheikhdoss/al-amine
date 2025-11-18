@@ -102,18 +102,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Nom -->
                     <div>
-                        <label for="nom" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                             Nom <span class="text-red-500">*</span>
                         </label>
                         <input 
                             type="text" 
-                            name="nom" 
-                            id="nom" 
-                            value="{{ old('nom', auth()->user()->nom) }}"
+                            name="name" 
+                            id="name" 
+                            value="{{ old('name', auth()->user()->name) }}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                         >
-                        @error('nom')
+                        @error('name')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
