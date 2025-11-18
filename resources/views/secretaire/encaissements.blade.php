@@ -99,13 +99,13 @@
                     <td class="py-4 px-4">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 text-white rounded-lg flex items-center justify-center font-bold text-xs">
-                                {{ substr($paiement->facture->consultation->patient->user->prenom, 0, 1) }}{{ substr($paiement->facture->consultation->patient->user->name, 0, 1) }}
+                                {{ substr($paiement->facture?->patient?->user?->prenom ?? 'P', 0, 1) }}{{ substr($paiement->facture?->patient?->user?->nom ?? 'N', 0, 1) }}
                             </div>
-                            <span class="font-semibold text-gray-900">{{ $paiement->facture->consultation->patient->user->nom_complet }}</span>
+                            <span class="font-semibold text-gray-900">{{ $paiement->facture?->patient?->user?->nom_complet ?? 'Patient inconnu' }}</span>
                         </div>
                     </td>
                     <td class="py-4 px-4 text-sm font-medium text-gray-700">
-                        {{ $paiement->facture->numero_facture }}
+                        {{ $paiement->facture?->numero_facture ?? '—' }}
                     </td>
                     <td class="py-4 px-4">
                         <span class="text-sm font-bold text-green-600">{{ number_format($paiement->montant, 0, ',', ' ') }} FCFA</span>

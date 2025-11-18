@@ -28,7 +28,7 @@
                 </div>
             </div>
         </div>
-        <div class="text-8xl animate-bounce-slow hidden lg:block">👨‍⚕️</div>
+      
     </div>
 </div>
 

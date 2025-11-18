@@ -13,6 +13,8 @@ use App\Http\Controllers\Praticien\RendezVousController;
 use App\Http\Controllers\Secretaire\DashboardController as SecretaireDashboardController;
 use App\Http\Controllers\Secretaire\FileAttenteController;
 use App\Http\Controllers\Secretaire\RendezVousController as SecretaireRendezVousController;
+use App\Http\Controllers\Secretaire\ReminderController;
+use App\Http\Controllers\Secretaire\ProfileController as SecretaireProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\PaydunyaWebhookController;
@@ -26,6 +28,9 @@ Route::get('/', function () {
 Route::post('/paydunya/ipn', [PaydunyaWebhookController::class, 'handleIPN'])->name('paydunya.ipn');
 Route::get('/paydunya/return', [PaydunyaWebhookController::class, 'paymentReturn'])->name('paydunya.return');
 Route::get('/paydunya/cancel', [PaydunyaWebhookController::class, 'paymentCancel'])->name('paydunya.cancel');
+
+// Route de test webhook Stripe (à supprimer en production)
+require __DIR__.'/test-webhook.php';
 
 // Redirection après login selon le rôle
 Route::get('/dashboard', function () {
@@ -88,12 +93,16 @@ Route::middleware(['auth', 'role:PATIENT'])->prefix('patient')->name('patient.')
     Route::post('/paiement/{facture}', [PatientDashboardController::class, 'traiterPaiement'])->name('paiement.traiter');
     
     // Messagerie
-    Route::get('/messagerie', [\App\Http\Controllers\Patient\MessagerieController::class, 'index'])->name('messagerie.index');
-    Route::get('/messagerie/nouveau', [\App\Http\Controllers\Patient\MessagerieController::class, 'nouveauMessage'])->name('messagerie.nouveau');
-    Route::get('/messagerie/{praticien}', [\App\Http\Controllers\Patient\MessagerieController::class, 'show'])->name('messagerie.show');
-    Route::post('/messagerie/{praticien}', [\App\Http\Controllers\Patient\MessagerieController::class, 'store'])->name('messagerie.store');
-    Route::get('/messagerie/{praticien}/messages', [\App\Http\Controllers\Patient\MessagerieController::class, 'getMessages'])->name('messagerie.messages');
-    
+    Route::get('/messagerie', [\App\Http\Controllers\Patient\ChatController::class, 'index'])->name('messagerie.index');
+    Route::prefix('messagerie')->name('messagerie.')->group(function () {
+        Route::get('/conversations', [\App\Http\Controllers\Patient\ChatController::class, 'conversations'])->name('conversations');
+        Route::post('/conversations', [\App\Http\Controllers\Patient\ChatController::class, 'storeConversation'])->name('conversations.store');
+        Route::get('/conversations/{conversation}', [\App\Http\Controllers\Patient\ChatController::class, 'show'])->name('conversations.show');
+        Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Patient\ChatController::class, 'storeMessage'])->name('conversations.messages.store');
+        Route::post('/conversations/{conversation}/read', [\App\Http\Controllers\Patient\ChatController::class, 'markAsRead'])->name('conversations.read');
+        Route::post('/conversations/{conversation}/archive', [\App\Http\Controllers\Patient\ChatController::class, 'archive'])->name('conversations.archive');
+    });
+
     // Calendrier
     Route::get('/calendrier', [\App\Http\Controllers\Patient\CalendrierController::class, 'index'])->name('calendrier');
     Route::get('/calendrier/events', [\App\Http\Controllers\Patient\CalendrierController::class, 'getEvents'])->name('calendrier.events');
@@ -125,7 +134,14 @@ Route::middleware(['auth', 'role:PRATICIEN'])->prefix('praticien')->name('pratic
     Route::get('/patient/{patient}/dossier', [PraticienDashboardController::class, 'dossierPatient'])->name('patient.dossier');
     Route::get('/mes-documents', [PraticienDashboardController::class, 'documents'])->name('documents');
     Route::get('/mon-agenda', [PraticienDashboardController::class, 'agenda'])->name('agenda');
-    Route::get('/messages', [PraticienDashboardController::class, 'chats'])->name('chats');
+    Route::prefix('messages')->name('messages.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Praticien\ChatController::class, 'index'])->name('index');
+        Route::get('/conversations', [\App\Http\Controllers\Praticien\ChatController::class, 'conversations'])->name('conversations');
+        Route::post('/conversations', [\App\Http\Controllers\Praticien\ChatController::class, 'storeConversation'])->name('conversations.store');
+        Route::get('/conversations/{conversation}', [\App\Http\Controllers\Praticien\ChatController::class, 'show'])->name('conversations.show');
+        Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Praticien\ChatController::class, 'storeMessage'])->name('conversations.messages.store');
+        Route::post('/conversations/{conversation}/read', [\App\Http\Controllers\Praticien\ChatController::class, 'markAsRead'])->name('conversations.read');
+    });
     Route::get('/disponibilites', [DisponibiliteController::class, 'index'])->name('disponibilites');
     Route::post('/disponibilites', [DisponibiliteController::class, 'store'])->name('disponibilites.store');
     Route::get('/consultations', [ConsultationController::class, 'index'])->name('consultations');
@@ -140,6 +156,10 @@ Route::middleware(['auth', 'role:PRATICIEN'])->prefix('praticien')->name('pratic
 // Routes SECRETAIRE
 Route::middleware(['auth', 'role:SECRETAIRE'])->prefix('secretaire')->name('secretaire.')->group(function () {
     Route::get('/dashboard', [SecretaireDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [SecretaireProfileController::class, 'edit'])->name('profile');
+    Route::patch('/profile', [SecretaireProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [SecretaireProfileController::class, 'updatePassword'])->name('profile.password.update');
+    Route::delete('/profile', [SecretaireProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/file-attente', [FileAttenteController::class, 'index'])->name('file-attente');
     Route::post('/demande/{demandeRdv}/valider', [FileAttenteController::class, 'valider'])->name('demande.valider');
     Route::post('/demande/{demandeRdv}/refuser', [FileAttenteController::class, 'refuser'])->name('demande.refuser');
@@ -148,11 +168,27 @@ Route::middleware(['auth', 'role:SECRETAIRE'])->prefix('secretaire')->name('secr
     Route::post('/rendez-vous/{rendezVous}/confirmer', [SecretaireRendezVousController::class, 'confirm'])->name('rendezvous.confirmer');
     Route::post('/rendez-vous/{rendezVous}/annuler', [SecretaireRendezVousController::class, 'cancel'])->name('rendezvous.annuler');
     Route::get('/agendas', [SecretaireDashboardController::class, 'agendas'])->name('agendas');
+    Route::get('/agendas/planning', [SecretaireDashboardController::class, 'multiAgenda'])->name('agendas.multi');
+    Route::get('/agendas/events', [SecretaireDashboardController::class, 'agendaEvents'])->name('agendas.events');
+    Route::post('/agendas/replanifier', [SecretaireDashboardController::class, 'agendaReplanifier'])->name('agendas.replanifier');
     Route::get('/agenda/{praticien}', [SecretaireDashboardController::class, 'agendaPraticien'])->name('agenda.praticien');
     Route::get('/facturation', [SecretaireDashboardController::class, 'facturation'])->name('facturation');
     Route::get('/generer-facture/{consultation}', [SecretaireDashboardController::class, 'genererFacture'])->name('facture.generer');
     Route::post('/facture/{consultation}', [SecretaireDashboardController::class, 'storeFacture'])->name('facture.store');
     Route::get('/encaissements', [SecretaireDashboardController::class, 'encaissements'])->name('encaissements');
+
+    Route::prefix('messages')->name('messages.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Secretaire\ChatController::class, 'index'])->name('index');
+        Route::get('/conversations', [\App\Http\Controllers\Secretaire\ChatController::class, 'conversations'])->name('conversations');
+        Route::post('/conversations', [\App\Http\Controllers\Secretaire\ChatController::class, 'storeConversation'])->name('conversations.store');
+        Route::get('/conversations/{conversation}', [\App\Http\Controllers\Secretaire\ChatController::class, 'show'])->name('conversations.show');
+        Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Secretaire\ChatController::class, 'storeMessage'])->name('conversations.messages.store');
+        Route::post('/conversations/{conversation}/read', [\App\Http\Controllers\Secretaire\ChatController::class, 'markAsRead'])->name('conversations.read');
+    });
+
+    Route::get('/relances', [ReminderController::class, 'index'])->name('relances.index');
+    Route::post('/relances/templates/{template}', [ReminderController::class, 'updateTemplate'])->name('relances.templates.update');
+    Route::post('/relances/send', [ReminderController::class, 'send'])->name('relances.send');
 });
 
 // Routes ADMIN
@@ -176,3 +212,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/patient-stripe.php';

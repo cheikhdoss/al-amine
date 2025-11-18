@@ -102,18 +102,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Nom -->
                     <div>
-                        <label for="nom" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                             Nom <span class="text-red-500">*</span>
                         </label>
                         <input 
                             type="text" 
-                            name="nom" 
-                            id="nom" 
-                            value="{{ old('nom', auth()->user()->nom) }}"
+                            name="name" 
+                            id="name" 
+                            value="{{ old('name', auth()->user()->name) }}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                         >
-                        @error('nom')
+                        @error('name')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
@@ -212,19 +212,16 @@
                     <!-- CNI -->
                     <div>
                         <label for="cni" class="block text-sm font-medium text-gray-700 mb-2">
-                            Carte CNI <span class="text-red-500">*</span>
+                            Carte CNI
                         </label>
                         <input 
                             type="text" 
-                            name="cni" 
                             id="cni" 
-                            value="{{ old('cni', auth()->user()->cni) }}"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required
+                            value="{{ auth()->user()->numero_cni }}"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                            readonly
                         >
-                        @error('cni')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                        <p class="text-xs text-gray-400 mt-1">Le numéro CNI est défini lors de votre inscription et ne peut pas être modifié.</p>
                     </div>
                 </div>
 

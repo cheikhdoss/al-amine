@@ -122,9 +122,9 @@
                         @foreach($factures as $facture)
                             <tr class="hover:bg-gray-50">
                                 <td class="py-3 font-semibold text-gray-900">{{ $facture->numero_facture }}</td>
-                                <td class="py-3 text-gray-700">{{ $facture->consultation->patient->user->nom_complet }}</td>
-                                <td class="py-3 text-gray-700">Dr. {{ $facture->consultation->praticien->user->nom_complet }}</td>
-                                <td class="py-3 font-semibold text-green-600">{{ number_format($facture->montant, 0, ',', ' ') }} FCFA</td>
+                                <td class="py-3 text-gray-700">{{ $facture->patient?->user?->nom_complet ?? 'Patient inconnu' }}</td>
+                                <td class="py-3 text-gray-700">Dr. {{ $facture->consultation?->praticien?->user?->nom_complet ?? '—' }}</td>
+                                <td class="py-3 font-semibold text-green-600">{{ number_format($facture->montant_total ?? 0, 0, ',', ' ') }} FCFA</td>
                                 <td class="py-3">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
                                         {{ $facture->statut === 'PAYEE' ? 'bg-green-100 text-green-800' :

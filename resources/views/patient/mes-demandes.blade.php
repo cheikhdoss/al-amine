@@ -30,7 +30,7 @@
             <select class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" onchange="if (this.value) window.location.href=this.value">
                 <option value="{{ route('patient.mes-demandes') }}">Tous les statuts</option>
                 <option value="{{ route('patient.mes-demandes', ['statut' => 'EN_ATTENTE']) }}" {{ request('statut') == 'EN_ATTENTE' ? 'selected' : '' }}>⏳ En attente de validation</option>
-                <option value="{{ route('patient.mes-demandes', ['statut' => 'EN_ATTENTE_PAIEMENT']) }}" {{ request('statut') == 'EN_ATTENTE_PAIEMENT' ? 'selected' : '' }}>💳 En attente de paiement</option>
+                <option value="{{ route('patient.mes-demandes', ['statut' => 'EN_ATTENTE_PAIEMENT']) }}" {{ request('statut') == 'EN_ATTENTE_PAIEMENT' ? 'selected' : '' }}>🔔 RDV à confirmer</option>
                 <option value="{{ route('patient.mes-demandes', ['statut' => 'CONFIRMEE']) }}" {{ request('statut') == 'CONFIRMEE' ? 'selected' : '' }}>✅ Confirmée</option>
                 <option value="{{ route('patient.mes-demandes', ['statut' => 'REFUSEE']) }}" {{ request('statut') == 'REFUSEE' ? 'selected' : '' }}>❌ Refusée</option>
                 <option value="{{ route('patient.mes-demandes', ['statut' => 'ANNULEE']) }}" {{ request('statut') == 'ANNULEE' ? 'selected' : '' }}>🚫 Annulée</option>
@@ -65,14 +65,14 @@
                         <div class="flex items-center mb-2">
                             <h4 class="text-lg font-bold text-gray-800">Dr. {{ $demande->praticien->user->nom_complet }}</h4>
                             <span class="ml-3 px-3 py-1 rounded-full text-sm font-semibold
-                                @if($demande->statut === 'EN_ATTENTE') bg-yellow-100 text-yellow-800
-                                @elseif($demande->statut === 'EN_ATTENTE_PAIEMENT') bg-orange-100 text-orange-800
+                                @if($demande->statut === 'EN_ATTENTE_PAIEMENT') bg-blue-100 text-blue-800
+                                @elseif($demande->statut === 'PAYEE') bg-blue-100 text-blue-800
                                 @elseif($demande->statut === 'CONFIRMEE') bg-green-100 text-green-800
                                 @elseif($demande->statut === 'REFUSEE') bg-red-100 text-red-800
                                 @elseif($demande->statut === 'ANNULEE') bg-gray-100 text-gray-800
                                 @endif">
-                                @if($demande->statut === 'EN_ATTENTE') ⏳ En attente de validation
-                                @elseif($demande->statut === 'EN_ATTENTE_PAIEMENT') 💳 En attente de paiement
+                                @if($demande->statut === 'EN_ATTENTE_PAIEMENT') 🔔 RDV à confirmer
+                                @elseif($demande->statut === 'PAYEE') ✅ Payé - En attente de validation
                                 @elseif($demande->statut === 'CONFIRMEE') ✅ Confirmée
                                 @elseif($demande->statut === 'REFUSEE') ❌ Refusée
                                 @elseif($demande->statut === 'ANNULEE') 🚫 Annulée

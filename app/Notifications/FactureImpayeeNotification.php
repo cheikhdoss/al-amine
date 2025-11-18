@@ -38,15 +38,15 @@ class FactureImpayeeNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->subject('Facture impayée - AL-AMINE')
-                    ->greeting('Bonjour ' . $this->facture->patient->user->prenom . ',')
-                    ->line('Nous vous rappelons qu\'une facture reste impayée.')
-                    ->line('**Numéro de facture:** #' . $this->facture->numero_facture)
-                    ->line('**Date:** ' . $this->facture->date_facture->format('d/m/Y'))
-                    ->line('**Montant total:** ' . number_format($this->facture->montant_total, 0, ',', ' ') . ' FCFA')
-                    ->line('**Montant restant:** ' . number_format($this->facture->montant_restant, 0, ',', ' ') . ' FCFA')
-                    ->action('Payer maintenant', route('patient.paiement', $this->facture))
-                    ->line('Merci de régulariser votre situation dans les meilleurs délais.');
+                    ->subject('⚠️ Facture en attente - Al-Amine')
+                    ->view('emails.notifications.facture-impayee', [
+                        'prenom' => $this->facture->patient->user->prenom ?? $this->facture->patient->user->name,
+                        'numero_facture' => $this->facture->numero_facture,
+                        'date_facture' => $this->facture->date_facture->format('d/m/Y'),
+                        'montant_total' => number_format($this->facture->montant_total, 0, ',', ' ') . ' FCFA',
+                        'montant_restant' => number_format($this->facture->montant_restant, 0, ',', ' ') . ' FCFA',
+                        'cta_url' => route('patient.paiement', $this->facture),
+                    ]);
     }
 
     /**
@@ -64,4 +64,5 @@ class FactureImpayeeNotification extends Notification implements ShouldQueue
             'message' => 'Facture #' . $this->facture->numero_facture . ' impayée - Montant: ' . number_format($this->facture->montant_restant, 0, ',', ' ') . ' FCFA',
         ];
     }
+
 }

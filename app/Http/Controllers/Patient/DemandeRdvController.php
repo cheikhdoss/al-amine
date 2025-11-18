@@ -7,6 +7,7 @@ use App\Models\DemandeRdv;
 use App\Models\Paiement;
 use App\Models\Specialite;
 use App\Models\Praticien;
+use App\Services\StripeService;
 use App\Services\PaydunyaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +35,7 @@ class DemandeRdvController extends Controller
         return view('patient.demander-rdv', compact('specialites'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, StripeService $stripeService, PaydunyaService $paydunyaService)
     {
         $request->validate([
             'specialite_id' => 'required|exists:specialites,id',
@@ -42,14 +43,14 @@ class DemandeRdvController extends Controller
             'date_heure_souhaitee' => 'required|date|after:now',
             'motif' => 'required|string|max:500',
             'mode_paiement' => 'required|in:EN_LIGNE,SUR_PLACE',
-            'methode_paiement' => 'required_if:mode_paiement,EN_LIGNE|nullable|in:CARTE_BANCAIRE,WAVE,ORANGE_MONEY,SUR_PLACE',
+            'methode_paiement' => 'required_if:mode_paiement,EN_LIGNE|nullable|in:CARTE_BANCAIRE,WAVE,ORANGE_MONEY',
         ]);
 
         $patient = auth()->user()->patient;
         $praticien = Praticien::findOrFail($request->praticien_id);
 
         DB::beginTransaction();
-        
+
         try {
             // Déterminer le statut initial selon le mode de paiement
             $statutInitial = $request->mode_paiement === 'EN_LIGNE' ? 'EN_ATTENTE_PAIEMENT' : 'EN_ATTENTE';
@@ -70,68 +71,81 @@ class DemandeRdvController extends Controller
             // Si paiement sur place, on termine ici (statut déjà EN_ATTENTE)
             if ($request->mode_paiement === 'SUR_PLACE') {
                 DB::commit();
-                
+
                 return redirect()->route('patient.mes-demandes')
                     ->with('success', 'Votre demande de rendez-vous a été envoyée avec succès. Vous pourrez payer lors de votre visite.');
             }
 
-            // Paiement en ligne avec PayDunya
-            // Calculer le montant (15 000 FCFA comme montant estimé)
-            $montant = 15000; // Vous pouvez aussi utiliser $praticien->tarif_consultation si disponible
+            // Paiement en ligne via Stripe Checkout
+            $montant = (int) ($praticien->tarif_consultation ?? 15000);
 
-            // Mapper CARTE_BANCAIRE vers CARTE pour correspondre à l'enum DB
-            $methodePaiement = $request->methode_paiement === 'CARTE_BANCAIRE' ? 'CARTE' : $request->methode_paiement;
+            $methodePaiement = $request->methode_paiement;
 
-            // Créer l'enregistrement de paiement
             $paiement = Paiement::create([
                 'patient_id' => $patient->id,
                 'montant' => $montant,
-                'methode_paiement' => $methodePaiement,
+                'methode_paiement' => match ($methodePaiement) {
+                    'CARTE_BANCAIRE' => 'CARTE',
+                    'WAVE' => 'WAVE',
+                    'ORANGE_MONEY' => 'ORANGE_MONEY',
+                    default => 'AUTRE',
+                },
                 'statut' => 'EN_ATTENTE',
                 'demande_rdv_id' => $demande->id,
                 'reference' => 'RDV-' . Str::upper(Str::random(10)),
             ]);
 
-            // Stocker le montant avancé pour suivi
             $demande->update([
                 'montant_avance' => $montant,
             ]);
 
-            // Appeler le service PayDunya pour créer la facture
-            $paydunyaService = app(PaydunyaService::class);
-            $result = $paydunyaService->createInvoice($demande, $paiement, $methodePaiement, $montant);
+            if ($methodePaiement === 'CARTE_BANCAIRE') {
+                $successUrl = route('patient.stripe.checkout.success', ['paiement' => $paiement->id]);
+                $cancelUrl = route('patient.stripe.checkout.cancel', ['paiement' => $paiement->id]);
 
-            // Vérifier que l'URL de paiement a été générée
-            if (empty($result['invoice_url'])) {
-                throw new \Exception('URL de paiement PayDunya non reçue');
+                $session = $stripeService->createCheckoutSession($paiement, [
+                    'success_url' => $successUrl,
+                    'cancel_url' => $cancelUrl,
+                ]);
+
+                DB::commit();
+
+                Log::info('Stripe - Redirection vers Checkout', [
+                    'demande_id' => $demande->id,
+                    'paiement_id' => $paiement->id,
+                    'session_id' => $session->id,
+                    'url' => $session->url,
+                ]);
+
+                return redirect()->away($session->url);
             }
 
-            // Enregistrer le token PayDunya
-            $demande->update([
-                'paydunya_token' => $result['token'] ?? null,
-            ]);
+            // PayDunya (Wave / Orange Money)
+            $invoice = $paydunyaService->createInvoice($demande, $paiement, $methodePaiement, $montant);
 
-            // Mettre à jour le paiement avec le token
             $paiement->update([
-                'numero_transaction' => $result['token'] ?? null,
+                'numero_transaction' => $invoice['token'] ?? null,
             ]);
 
             DB::commit();
 
-            Log::info('PayDunya - Redirection vers page de paiement', [
+            Log::info('PayDunya - Redirection vers checkout', [
                 'demande_id' => $demande->id,
                 'paiement_id' => $paiement->id,
-                'token' => $result['token'] ?? null,
-                'url' => $result['invoice_url'],
+                'token' => $invoice['token'] ?? null,
+                'url' => $invoice['invoice_url'] ?? null,
             ]);
 
-            // Rediriger vers la page de paiement PayDunya
-            return redirect($result['invoice_url']);
+            if (!empty($invoice['invoice_url'])) {
+                return redirect()->away($invoice['invoice_url']);
+            }
+
+            throw new \RuntimeException('URL de paiement PayDunya indisponible.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            Log::error('Erreur lors de la création du paiement PayDunya', [
+
+            Log::error('Erreur lors de la création du paiement en ligne', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

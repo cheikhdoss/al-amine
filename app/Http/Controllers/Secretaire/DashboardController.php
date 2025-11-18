@@ -55,6 +55,98 @@ class DashboardController extends Controller
         return view('secretaire.agendas', compact('praticiens'));
     }
 
+    public function multiAgenda()
+    {
+        $praticiens = Praticien::with('user')->get()->map(function (Praticien $praticien) {
+            $praticien->color_code = $this->colorForPracticien($praticien->id);
+
+            return $praticien;
+        });
+
+        return view('secretaire.agendas-multi', compact('praticiens'));
+    }
+
+    public function agendaEvents(Request $request)
+    {
+        $start = Carbon::parse($request->query('start', now()->startOfWeek()));
+        $end = Carbon::parse($request->query('end', now()->endOfWeek()->addDays(7)));
+        $praticienIds = collect($request->query('praticiens', []))->filter()->map(fn ($id) => (int) $id);
+
+        $query = RendezVous::with(['patient.user', 'praticien.user'])
+            ->whereBetween('date_heure_rdv', [$start, $end]);
+
+        if ($praticienIds->isNotEmpty()) {
+            $query->whereIn('praticien_id', $praticienIds);
+        }
+
+        $events = $query->get()->map(function (RendezVous $rdv) {
+            $start = $rdv->date_heure_rdv;
+            $end = (clone $start)->addMinutes($rdv->duree ?? 30);
+
+            return [
+                'id' => $rdv->id,
+                'title' => sprintf('Dr. %s · %s', $rdv->praticien->user->nom_complet ?? '', $rdv->patient->user->nom_complet ?? ''),
+                'start' => $start->toIso8601String(),
+                'end' => $end->toIso8601String(),
+                'backgroundColor' => $this->colorForPracticien($rdv->praticien_id),
+                'borderColor' => $this->colorForPracticien($rdv->praticien_id),
+                'extendedProps' => [
+                    'praticien_id' => $rdv->praticien_id,
+                    'praticien_nom' => $rdv->praticien->user->nom_complet ?? '',
+                    'patient_nom' => $rdv->patient->user->nom_complet ?? '',
+                    'statut' => $rdv->statut,
+                    'duree' => $rdv->duree ?? 30,
+                ],
+            ];
+        });
+
+        return response()->json($events);
+    }
+
+    public function agendaReplanifier(Request $request)
+    {
+        $data = $request->validate([
+            'rendezvous_id' => ['required', 'exists:rendez_vous,id'],
+            'praticien_id' => ['required', 'exists:praticiens,id'],
+            'start' => ['required', 'date'],
+            'end' => ['nullable', 'date'],
+        ]);
+
+        $rendezVous = RendezVous::with(['patient.user', 'praticien.user'])->findOrFail($data['rendezvous_id']);
+        $start = Carbon::parse($data['start']);
+        $end = $data['end'] ? Carbon::parse($data['end']) : (clone $start)->addMinutes($rendezVous->duree ?? 30);
+        $dureeMinutes = max(5, $start->diffInMinutes($end));
+
+        $conflict = RendezVous::where('praticien_id', $data['praticien_id'])
+            ->where('id', '!=', $rendezVous->id)
+            ->whereBetween('date_heure_rdv', [$start->copy()->subMinutes($dureeMinutes), $end])
+            ->get()
+            ->contains(function (RendezVous $other) use ($start, $end) {
+                $otherStart = $other->date_heure_rdv;
+                $otherEnd = (clone $otherStart)->addMinutes($other->duree ?? 30);
+
+                return $start < $otherEnd && $end > $otherStart;
+            });
+
+        if ($conflict) {
+            return response()->json([
+                'status' => 'conflict',
+                'message' => 'Un autre rendez-vous est déjà planifié sur ce créneau pour ce praticien.',
+            ], 409);
+        }
+
+        $rendezVous->update([
+            'date_heure_rdv' => $start,
+            'duree' => $dureeMinutes,
+            'praticien_id' => $data['praticien_id'],
+        ]);
+
+        return response()->json([
+            'status' => 'ok',
+            'message' => 'Rendez-vous replanifié avec succès.',
+        ]);
+    }
+
     public function agendaPraticien(Praticien $praticien)
     {
         $rendezVous = RendezVous::with(['patient.user', 'consultation'])
@@ -130,5 +222,17 @@ class DashboardController extends Controller
             ->paginate(20);
 
         return view('secretaire.encaissements', compact('stats', 'paiements'));
+    }
+
+    private function colorForPracticien(int $praticienId): string
+    {
+        $palette = [
+            '#2563eb', '#16a34a', '#9333ea', '#dc2626', '#f97316',
+            '#0ea5e9', '#6366f1', '#db2777', '#f59e0b', '#14b8a6',
+        ];
+
+        $index = abs(crc32((string) $praticienId)) % count($palette);
+
+        return $palette[$index];
     }
 }
