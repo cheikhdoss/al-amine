@@ -27,7 +27,7 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
             'telephone' => ['nullable', 'string', 'max:20'],
-            'numero_cni' => ['nullable', 'string', 'max:20'],
+            'numero_cni' => ['prohibited'],
             'date_naissance' => ['nullable', 'date'],
             'sexe' => ['nullable', 'in:M,F'],
             'adresse' => ['nullable', 'string', 'max:255'],

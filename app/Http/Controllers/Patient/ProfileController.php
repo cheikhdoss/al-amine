@@ -27,11 +27,12 @@ class ProfileController extends Controller
             'email' => ['required', 'email', 'unique:users,email,' . $user->id],
             'date_naissance' => ['required', 'date'],
             'sexe' => ['required', 'in:M,F'],
-            'numero_cni' => ['required', 'string', 'max:50'],
             'adresse' => ['required', 'string', 'max:255'],
             'quartier' => ['nullable', 'string', 'max:255'],
             'ville' => ['nullable', 'string', 'max:255'],
         ]);
+
+        unset($validated['numero_cni']);
 
         $user->update($validated);
 

@@ -2184,12 +2184,18 @@
             <button class="close-btn" onclick="closeLoginModal()">&times;</button>
             <h2 class="modal-title">Connexion Patient</h2>
 
-            @if(session('authError'))
-                <div class="form-error" style="margin-bottom: 1rem;">{{ session('authError') }}</div>
-            @endif
+            @php
+                $loginError = session('authError') ?? $errors->first('email');
+            @endphp
 
-            @if($errors->has('email'))
-                <div class="form-error" style="margin-bottom: 1rem;">{{ $errors->first('email') }}</div>
+            @if($loginError)
+                <div style="background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;padding:0.875rem 1rem;border-radius:0.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;">
+                    <span style="font-size:1.25rem;">⚠️</span>
+                    <div>
+                        <strong>Erreur de connexion</strong>
+                        <p style="margin:0.25rem 0 0;font-size:0.875rem;">{{ $loginError }}</p>
+                    </div>
+                </div>
             @endif
             <form method="POST" action="{{ route('login') }}">
                 @csrf
@@ -2214,6 +2220,18 @@
         <div class="modal-content">
             <button class="close-btn" onclick="closeRegisterModal()">&times;</button>
             <h2 class="modal-title">Créer un Compte Patient</h2>
+
+            @if($errors->any())
+                <div style="background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;padding:0.875rem 1rem;border-radius:0.5rem;margin-bottom:1rem;">
+                    <strong style="display:flex;align-items:center;gap:0.5rem;"><span>⚠️</span> Erreurs dans le formulaire:</strong>
+                    <ul style="margin:0.5rem 0 0;padding-left:1.5rem;font-size:0.875rem;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('register') }}">
                 @csrf
                 <div class="register-grid">

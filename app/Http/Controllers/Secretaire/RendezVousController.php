@@ -7,6 +7,7 @@ use App\Http\Controllers\Traits\ManagesRendezVous;
 use App\Models\DemandeRdv;
 use App\Models\Praticien;
 use App\Models\RendezVous;
+use App\Notifications\RendezVousStatusNotification;
 use App\Services\PlanningService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -176,6 +177,10 @@ class RendezVousController extends Controller
             'valide_par' => $secretaireId,
         ]);
 
+        $rendezVous->loadMissing(['patient.user', 'praticien.user']);
+        optional($rendezVous->patient?->user)
+            ->notify(new RendezVousStatusNotification($rendezVous, 'CONFIRME'));
+
         return back()->with('success', 'Le rendez-vous a été confirmé.');
     }
 
@@ -199,6 +204,10 @@ class RendezVousController extends Controller
             'valide_par' => $secretaireId,
             'notes' => $motif !== '' ? $motif : $rendezVous->notes,
         ]);
+
+        $rendezVous->loadMissing(['patient.user', 'praticien.user']);
+        optional($rendezVous->patient?->user)
+            ->notify(new RendezVousStatusNotification($rendezVous, 'ANNULE'));
 
         return back()->with('success', 'Le rendez-vous a été annulé.');
     }

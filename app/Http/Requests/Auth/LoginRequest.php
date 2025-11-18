@@ -41,14 +41,28 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        $email = $this->string('email');
+        $password = $this->string('password');
+
+        // Vérifier si l'email existe
+        $userExists = \App\Models\User::where('email', $email)->exists();
+
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             session()->flash('openLogin', true);
-            session()->flash('authError', 'Compte non trouvé. Vérifiez vos identifiants.');
+
+            // Message d'erreur spécifique selon le cas
+            if (!$userExists) {
+                $errorMessage = '❌ Adresse email non trouvée. Vérifiez votre email ou créez un compte.';
+            } else {
+                $errorMessage = '❌ Mot de passe incorrect. Vérifiez votre mot de passe.';
+            }
+
+            session()->flash('authError', $errorMessage);
 
             throw ValidationException::withMessages([
-                'email' => 'Compte non trouvé. Vérifiez vos identifiants.',
+                'email' => $errorMessage,
             ]);
         }
 
