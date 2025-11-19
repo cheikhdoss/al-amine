@@ -15,7 +15,10 @@
         <!-- Sidebar -->
         <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-gradient-to-b from-blue-950 via-blue-900 to-blue-950 text-white transition-all duration-300 fixed h-full z-30 shadow-2xl">
             <div class="p-4 flex items-center justify-between border-b border-blue-800/50">
-                <h1 :class="sidebarOpen ? '' : 'hidden'" class="text-xl font-bold">Al-Amine</h1>
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('photos/b9d47d611bf6c652139b2517abae1d9f.png') }}" alt="Logo Al-Amine" class="w-10 h-10 rounded-2xl object-cover shadow-lg shadow-blue-900/50">
+                    <h1 :class="sidebarOpen ? '' : 'hidden'" class="text-xl font-bold">Al-Amine</h1>
+                </div>
                 <button @click="sidebarOpen = !sidebarOpen" class="p-2 hover:bg-blue-800/50 rounded transition-colors duration-200">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>

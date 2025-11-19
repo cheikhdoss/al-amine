@@ -25,9 +25,7 @@
             <!-- Logo/Header -->
             <div class="p-6 border-b border-blue-800/60">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                        <span class="text-2xl">🏥</span>
-                    </div>
+                    <img src="{{ asset('photos/b9d47d611bf6c652139b2517abae1d9f.png') }}" alt="Logo Al-Amine" class="w-12 h-12 rounded-2xl object-cover shadow-lg shadow-blue-900/40">
                     <div>
                         <h1 class="font-bold text-lg">Al-Amine</h1>
                         <p class="text-xs text-indigo-300">Espace Praticien</p>
