@@ -21,6 +21,7 @@ class DashboardController extends Controller
         $stats = [
             'rdv_aujourdhui' => RendezVous::where('praticien_id', $praticien->id)
                 ->whereDate('date_heure_rdv', today())
+                ->whereIn('statut', ['CONFIRME', 'PLANIFIE', 'EN_COURS'])
                 ->count(),
             'consultations_mois' => Consultation::where('praticien_id', $praticien->id)
                 ->whereMonth('date_consultation', now()->month)
@@ -31,6 +32,7 @@ class DashboardController extends Controller
             'rdv_a_venir' => RendezVous::where('praticien_id', $praticien->id)
                 ->where('date_heure_rdv', '>', now())
                 ->where('date_heure_rdv', '<=', now()->addDays(7))
+                ->whereIn('statut', ['CONFIRME', 'PLANIFIE'])
                 ->count(),
         ];
 
@@ -38,6 +40,7 @@ class DashboardController extends Controller
         $rdvAujourdhui = RendezVous::with(['patient.user', 'consultation'])
             ->where('praticien_id', $praticien->id)
             ->whereDate('date_heure_rdv', today())
+            ->whereIn('statut', ['CONFIRME', 'PLANIFIE', 'EN_COURS'])
             ->orderBy('date_heure_rdv')
             ->get();
 
@@ -46,6 +49,7 @@ class DashboardController extends Controller
             ->where('praticien_id', $praticien->id)
             ->where('date_heure_rdv', '>', now())
             ->where('date_heure_rdv', '<=', now()->addDays(7))
+            ->whereIn('statut', ['CONFIRME', 'PLANIFIE'])
             ->orderBy('date_heure_rdv')
             ->take(5)
             ->get();
@@ -178,6 +182,7 @@ class DashboardController extends Controller
             ->where('praticien_id', $praticien->id)
             ->where('date_heure_rdv', '>=', now()->startOfWeek())
             ->where('date_heure_rdv', '<=', now()->endOfWeek()->addWeeks(2))
+            ->whereIn('statut', ['CONFIRME', 'PLANIFIE', 'EN_COURS'])
             ->orderBy('date_heure_rdv')
             ->get();
 
@@ -185,12 +190,14 @@ class DashboardController extends Controller
         $rdvAujourdhui = RendezVous::with(['patient.user', 'consultation'])
             ->where('praticien_id', $praticien->id)
             ->whereDate('date_heure_rdv', today())
+            ->whereIn('statut', ['CONFIRME', 'PLANIFIE', 'EN_COURS'])
             ->orderBy('date_heure_rdv')
             ->get();
 
         $prochainsRdv = RendezVous::with(['patient.user'])
             ->where('praticien_id', $praticien->id)
             ->where('date_heure_rdv', '>=', now())
+            ->whereIn('statut', ['CONFIRME', 'PLANIFIE'])
             ->orderBy('date_heure_rdv')
             ->take(10)
             ->get();
@@ -296,6 +303,7 @@ class DashboardController extends Controller
         $rendezVous = RendezVous::with('praticien.user')
             ->where('patient_id', $patient->id)
             ->where('praticien_id', $praticien->id)
+            ->whereIn('statut', ['CONFIRME', 'PLANIFIE', 'EN_COURS', 'TERMINE'])
             ->orderBy('date_heure_rdv', 'desc')
             ->get();
 
