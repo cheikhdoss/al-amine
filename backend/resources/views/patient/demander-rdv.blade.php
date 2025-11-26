@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto">
-    <div class="bg-white rounded-lg shadow-lg" x-data="{ step: 1, specialite: '', praticien: '', praticiens: [], modePaiement: 'SUR_PLACE', methodePaiement: '' }">
+    <div class="bg-white rounded-lg shadow-lg" x-data="demandeRdvForm()">
         <!-- Progress Steps -->
         <div class="px-8 py-6 border-b">
             <div class="flex items-center justify-between text-sm">
@@ -49,7 +49,7 @@
                 <h3 class="text-2xl font-bold mb-6">Choisissez une spécialité</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($specialites as $spec)
-                    <div @click="specialite = {{ $spec->id }}; step = 2"
+                    <div @click="selectSpecialite({{ $spec->id }})"
                          :class="specialite == {{ $spec->id }} ? 'border-blue-600 bg-blue-50' : 'border-gray-300'"
                          class="border-2 rounded-lg p-6 cursor-pointer hover:border-blue-400 transition">
                         <div class="text-4xl mb-3">{{ $spec->icone }}</div>
@@ -66,31 +66,34 @@
             <div x-show="step === 2" class="p-8">
                 <h3 class="text-2xl font-bold mb-6">Choisissez un praticien</h3>
                 <div class="space-y-4">
-                    @foreach($specialites as $spec)
-                    <template x-if="specialite == {{ $spec->id }}">
+                    <template x-if="praticiensList.length > 0">
                         <div>
-                            @foreach($spec->praticiens as $prat)
-                            <div @click="praticien = {{ $prat->id }}"
-                                 :class="praticien == {{ $prat->id }} ? 'border-blue-600 bg-blue-50' : 'border-gray-300'"
-                                 class="border-2 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition mb-4">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex-1">
-                                        <h4 class="text-lg font-bold">Dr. {{ $prat->user->nom_complet }}</h4>
-                                        <p class="text-sm text-gray-600">{{ $prat->annees_experience }} ans d'expérience</p>
-                                        @if($prat->biographie)
-                                        <p class="text-sm text-gray-500 mt-2">{{ $prat->biographie }}</p>
-                                        @endif
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-blue-600 font-bold">{{ $prat->tarif_format }}</p>
-                                        <p class="text-xs text-gray-500">{{ $prat->service->nom }}</p>
+                            <template x-for="prat in praticiensList" :key="prat.id">
+                                <div @click="praticien = prat.id"
+                                     :class="praticien == prat.id ? 'border-blue-600 bg-blue-50' : 'border-gray-300'"
+                                     class="border-2 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition mb-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <h4 class="text-lg font-bold" x-text="prat.nom"></h4>
+                                            <p class="text-sm text-gray-600" x-text="prat.experience"></p>
+                                            <template x-if="prat.biographie">
+                                                <p class="text-sm text-gray-500 mt-2" x-text="prat.biographie"></p>
+                                            </template>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-blue-600 font-bold" x-text="prat.tarif"></p>
+                                            <p class="text-xs text-gray-500" x-text="prat.service"></p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            @endforeach
+                            </template>
                         </div>
                     </template>
-                    @endforeach
+                    <template x-if="praticiensList.length === 0">
+                        <div class="text-center py-8">
+                            <p class="text-gray-500">Aucun praticien disponible pour cette spécialité</p>
+                        </div>
+                    </template>
                 </div>
                 <input type="hidden" name="praticien_id" x-model="praticien">
                 <div class="flex justify-between mt-6">
@@ -204,17 +207,16 @@
             </div>
 
             <!-- Step 5: Confirmation -->
-                        <!-- Step 5: Confirmation -->
             <div x-show="step === 5" class="p-8">
                 <h3 class="text-2xl font-bold mb-6">✅ Confirmation de votre demande</h3>
                 <div class="bg-gray-50 rounded-lg p-6 space-y-4">
                     <div class="flex justify-between border-b pb-3">
                         <span class="text-gray-600">Spécialité:</span>
-                        <span class="font-semibold" x-text="'Voir sélection'"></span>
+                        <span class="font-semibold" x-text="getSpecialiteNom()"></span>
                     </div>
                     <div class="flex justify-between border-b pb-3">
                         <span class="text-gray-600">Praticien:</span>
-                        <span class="font-semibold" x-text="'Dr. Voir sélection'"></span>
+                        <span class="font-semibold" x-text="getPraticienNom()"></span>
                     </div>
                     <div class="flex justify-between border-b pb-3">
                         <span class="text-gray-600">Mode de paiement:</span>
@@ -222,7 +224,7 @@
                     </div>
                     <div x-show="modePaiement === 'EN_LIGNE'" class="flex justify-between border-b pb-3">
                         <span class="text-gray-600">Méthode:</span>
-                        <span class="font-semibold" x-text="methodePaiement.replace('_', ' ')"></span>
+                        <span class="font-semibold" x-text="methodePaiement.replace(/_/g, ' ')"></span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Statut:</span>
@@ -268,5 +270,54 @@
         </form>
     </div>
 </div>
+
+<script>
+function demandeRdvForm() {
+    return {
+        step: 1,
+        specialite: '',
+        praticien: '',
+        praticiensList: [],
+        modePaiement: 'SUR_PLACE',
+        methodePaiement: '',
+        specialites: {!! json_encode($specialites->map(function($spec) {
+            return [
+                'id' => $spec->id,
+                'nom' => $spec->nom,
+                'praticiens' => $spec->praticiens->map(function($prat) {
+                    return [
+                        'id' => $prat->id,
+                        'nom' => 'Dr. ' . $prat->user->nom_complet,
+                        'experience' => $prat->annees_experience . ' ans d\'expérience',
+                        'biographie' => $prat->biographie,
+                        'tarif' => number_format($prat->tarif_consultation ?? 0, 0, ',', ' ') . ' FCFA',
+                        'service' => $prat->service->nom ?? 'Service',
+                    ];
+                })->toArray(),
+            ];
+        })) !!},
+        
+        selectSpecialite(id) {
+            this.specialite = id;
+            const spec = this.specialites.find(s => s.id == id);
+            this.praticiensList = spec ? spec.praticiens : [];
+            this.praticien = '';
+            this.step = 2;
+        },
+        
+        getSpecialiteNom() {
+            const spec = this.specialites.find(s => s.id == this.specialite);
+            return spec ? spec.nom : '';
+        },
+        
+        getPraticienNom() {
+            const spec = this.specialites.find(s => s.id == this.specialite);
+            if (!spec) return '';
+            const prat = spec.praticiens.find(p => p.id == this.praticien);
+            return prat ? prat.nom : '';
+        }
+    }
+}
+</script>
 @endsection
 

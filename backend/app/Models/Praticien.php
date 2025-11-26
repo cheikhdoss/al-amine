@@ -51,4 +51,9 @@ class Praticien extends Model
             ->withPivot('niveau_expertise', 'est_principale')
             ->withTimestamps();
     }
+
+    public function getTarifFormatAttribute()
+    {
+        return number_format($this->tarif_consultation, 0, ',', ' ') . ' FCFA';
+    }
 }
