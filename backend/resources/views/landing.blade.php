@@ -184,8 +184,10 @@
 
         .btn-outline {
             background: rgba(37, 99, 235, 0.08);
-            color: rgba(226, 232, 240, 0.92);
+            /* Utiliser une couleur de texte foncée pour améliorer le contraste et la lisibilité */
+            color: #0f172a; /* slate-900 */
             border: 1px solid rgba(59, 130, 246, 0.4);
+            font-weight: 600;
         }
 
         .btn-outline:hover {
