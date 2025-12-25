@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Hôpital Al-Amine')</title>
+    <title>@yield('title', 'Al-Amine RDV')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -16,8 +16,7 @@
         <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-gradient-to-b from-blue-950 via-blue-900 to-blue-950 text-white transition-all duration-300 fixed h-full z-30 shadow-2xl">
             <div class="p-4 flex items-center justify-between border-b border-blue-800/50">
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('photos/b9d47d611bf6c652139b2517abae1d9f.png') }}" alt="Logo Al-Amine" class="w-10 h-10 rounded-2xl object-cover shadow-lg shadow-blue-900/50">
-                    <h1 :class="sidebarOpen ? '' : 'hidden'" class="text-xl font-bold">Al-Amine</h1>
+                    <img src="{{ asset('photos/logoalmine.png') }}" alt="Al-Amine RDV" class="h-16 w-auto object-contain">
                 </div>
                 <button @click="sidebarOpen = !sidebarOpen" class="p-2 hover:bg-blue-800/50 rounded transition-colors duration-200">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

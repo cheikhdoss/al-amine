@@ -21,15 +21,15 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .header {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            background: linear-gradient(135deg, #0f172a, #1d4ed8, #3b82f6);
             color: white;
             padding: 30px 20px;
             text-align: center;
         }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: bold;
+        .header img {
+            height: 70px;
+            border-radius: 14px;
+            margin-bottom: 10px;
         }
         .header p {
             margin: 5px 0 0 0;
@@ -57,7 +57,7 @@
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>AL-AMINE</h1>
+            <img src="{{ $message->embed(public_path('photos/logoalmine.png')) }}" alt="Al-Amine RDV">
             <p>Centre de Santé</p>
         </div>
         
@@ -67,7 +67,7 @@
         
         <div class="footer">
             <p>Cet email a été envoyé automatiquement. Merci de ne pas y répondre.</p>
-            <p>© {{ date('Y') }} AL-AMINE - Tous droits réservés</p>
+            <p>© {{ date('Y') }} AL-AMINE RDV - Tous droits réservés</p>
         </div>
     </div>
 </body>

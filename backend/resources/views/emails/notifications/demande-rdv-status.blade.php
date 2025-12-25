@@ -60,5 +60,5 @@
         </a>
     @endif
 
-    <p style="margin:28px 0 0;">Merci de votre confiance envers Al-Amine.</p>
+    <p style="margin:28px 0 0;">Merci de votre confiance envers Al-Amine RDV.</p>
 @endsection
