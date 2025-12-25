@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Al-Amine</title>
+    <title>Al-Amine RDV</title>
     <style>
         :root {
             color-scheme: light;
@@ -36,9 +36,13 @@
             color: #f8fafc;
         }
         .header-logo {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: 0.6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-logo img {
+            height: 60px;
+            border-radius: 12px;
         }
         .header-tagline {
             margin-top: 6px;
@@ -105,7 +109,9 @@
     <div class="wrapper">
         <div class="container">
             <div class="header">
-                <div class="header-logo">Al-Amine</div>
+                <div class="header-logo">
+                    <img src="{{ $message->embed(public_path('photos/logoalmine.png')) }}" alt="Al-Amine RDV">
+                </div>
                 <div class="header-tagline">Votre partenaire santé au Sénégal</div>
             </div>
             <div class="content">
@@ -119,7 +125,7 @@
                 @endisset
             </div>
             <div class="footer">
-                © {{ date('Y') }} Al-Amine · sacre coeur III, Dakar · +221 33 123 45 67
+                © {{ date('Y') }} Al-Amine RDV · sacre coeur III, Dakar · +221 33 123 45 67
             </div>
         </div>
     </div>

@@ -32,7 +32,7 @@
                                         </svg>
                                     </span>
                                     <div>
-                                        <h2 class="text-xl font-semibold leading-tight">Hôpital Al-Amine</h2>
+                                        <h2 class="text-xl font-semibold leading-tight">Al-Amine RDV</h2>
                                         <p class="text-sm text-white/80">Plateforme de santé connectée</p>
                                     </div>
                                 </a>
@@ -86,7 +86,7 @@
                                 </span>
                                 <div>
                                     <p class="text-xs uppercase tracking-[0.3em] text-blue-500">Espace sécurisé</p>
-                                    <h2 class="text-lg font-semibold text-slate-800">Plateforme patient Al-Amine</h2>
+                                    <h2 class="text-lg font-semibold text-slate-800">Plateforme patient Al-Amine RDV</h2>
                                 </div>
                             </div>
                             <div class="space-y-6">

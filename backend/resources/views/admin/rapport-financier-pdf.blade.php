@@ -22,7 +22,7 @@
 </head>
 <body>
     <div class="header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Logo-hospital.png" class="logo" alt="Hopital Al-Amine" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Logo-hospital.png" class="logo" alt="Al-Amine RDV" />
         <div>
             <div class="title">Rapport financier</div>
             <div class="period">Période du {{ Carbon::parse($dateDebut)->format('d/m/Y') }} au {{ Carbon::parse($dateFin)->format('d/m/Y') }}</div>
@@ -61,6 +61,6 @@
     </table>
 
     <div class="muted">Rapport généré automatiquement le {{ now()->format('d/m/Y à H:i') }}.</div>
-    <div class="footer">Hôpital Al-Amine &copy; {{ date('Y') }}</div>
+    <div class="footer">Al-Amine RDV &copy; {{ date('Y') }}</div>
 </body>
 </html>

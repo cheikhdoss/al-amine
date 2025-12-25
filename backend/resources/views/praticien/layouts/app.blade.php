@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Praticien') - Al-Amine</title>
+    <title>@yield('title', 'Praticien') - Al-Amine RDV</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -25,11 +25,7 @@
             <!-- Logo/Header -->
             <div class="p-6 border-b border-blue-800/60">
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('photos/b9d47d611bf6c652139b2517abae1d9f.png') }}" alt="Logo Al-Amine" class="w-12 h-12 rounded-2xl object-cover shadow-lg shadow-blue-900/40">
-                    <div>
-                        <h1 class="font-bold text-lg">Al-Amine</h1>
-                        <p class="text-xs text-indigo-300">Espace Praticien</p>
-                    </div>
+                    <img src="{{ asset('photos/logoalmine.png') }}" alt="Al-Amine RDV" class="h-16 w-auto object-contain">
                 </div>
             </div>
 

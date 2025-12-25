@@ -291,45 +291,99 @@
         gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
         gradient.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
 
+        const gradientGreen = ctx.getContext('2d').createLinearGradient(0, 0, 0, 250);
+        gradientGreen.addColorStop(0, 'rgba(34, 197, 94, 0.4)');
+        gradientGreen.addColorStop(1, 'rgba(34, 197, 94, 0.05)');
+
+        const gradientOrange = ctx.getContext('2d').createLinearGradient(0, 0, 0, 250);
+        gradientOrange.addColorStop(0, 'rgba(249, 115, 22, 0.4)');
+        gradientOrange.addColorStop(1, 'rgba(249, 115, 22, 0.05)');
+
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-                datasets: [{
-                    label: 'Demandes',
-                    data: [15, 22, 18, 25, 20, 12, 8],
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: 'rgba(59, 130, 246, 1)',
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
+                labels: @json($stats['chart_labels']),
+                datasets: [
+                    {
+                        label: 'Demandes',
+                        data: @json($stats['chart_demandes']),
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: 'rgba(59, 130, 246, 1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'RDV',
+                        data: @json($stats['chart_rdvs']),
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        backgroundColor: gradientGreen,
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: 'rgba(34, 197, 94, 1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'Paiements',
+                        data: @json($stats['chart_paiements']),
+                        borderColor: 'rgba(249, 115, 22, 1)',
+                        backgroundColor: gradientOrange,
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: 'rgba(249, 115, 22, 1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }
+                ]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: true,
                 plugins: {
-                    legend: { display: false },
+                    legend: { 
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 12, weight: '600' }
+                        }
+                    },
                     tooltip: {
-                        backgroundColor: 'rgba(37, 99, 235, 0.9)',
+                        backgroundColor: 'rgba(31, 41, 55, 0.95)',
                         titleColor: '#fff',
                         bodyColor: '#fff',
                         padding: 12,
                         borderRadius: 8,
-                        displayColors: false
+                        displayColors: true,
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label;
+                            },
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y;
+                            }
+                        }
                     }
                 },
                 interaction: { mode: 'index', intersect: false },
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { color: '#6b7280', font: { size: 12 } }
+                        ticks: { color: '#6b7280', font: { size: 11 } }
                     },
                     y: {
                         grid: { color: 'rgba(148, 163, 184, 0.2)' },
-                        ticks: { color: '#6b7280', beginAtZero: true }
+                        ticks: { color: '#6b7280', beginAtZero: true, precision: 0 }
                     }
                 }
             }

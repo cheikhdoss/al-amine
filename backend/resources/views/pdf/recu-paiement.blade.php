@@ -124,7 +124,7 @@
     <div class="watermark">PAYÉ</div>
 
     <div class="header">
-        <h1>🏥 CLINIQUE AL-AMINE</h1>
+        <h1>🏥 CLINIQUE AL-AMINE RDV</h1>
         <p>Adresse de la clinique • Téléphone: +221 XX XXX XX XX</p>
         <p>Email: contact@al-amine.sn • www.al-amine.sn</p>
     </div>
@@ -241,7 +241,7 @@
     <div class="footer">
         <p><strong>Ce reçu fait foi de paiement</strong></p>
         <p>Document généré électroniquement le {{ now()->format('d/m/Y à H:i') }}</p>
-        <p style="margin-top: 10px;">Clinique Al-Amine • Tous droits réservés © {{ now()->year }}</p>
+        <p style="margin-top: 10px;">Clinique Al-Amine RDV • Tous droits réservés © {{ now()->year }}</p>
     </div>
 </body>
 </html>

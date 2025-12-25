@@ -55,5 +55,5 @@
         Consulter mes paiements
     </a>
 
-    <p style="margin:28px 0 0;">À très bientôt,<br>Al-Amine</p>
+    <p style="margin:28px 0 0;">À très bientôt,<br>Al-Amine RDV</p>
 @endsection

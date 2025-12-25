@@ -120,7 +120,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo">AL-AMINE</div>
+        <div class="logo">AL-AMINE RDV</div>
         <div class="praticien-info">
             <p><strong>Dr. {{ $ordonnance->praticien->user->nom_complet }}</strong></p>
             <p>{{ $ordonnance->praticien->specialites->pluck('nom')->implode(', ') }}</p>

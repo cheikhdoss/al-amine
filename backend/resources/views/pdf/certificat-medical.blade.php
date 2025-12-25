@@ -81,7 +81,7 @@
 <body>
     <div class="header">
         <div>
-            <div class="brand">Hôpital Al-Amine</div>
+            <div class="brand">Al-Amine RDV</div>
             <div class="subtitle">Centre Hospitalier Universitaire • Dakar, Sénégal</div>
         </div>
         <div style="text-align:right;">
@@ -122,7 +122,7 @@
     <div>
         <div class="section-title">Certificat</div>
         <p class="body-text">
-            Je soussigné(e) {{ auth()->user()->nom_complet ?? 'Dr. __________________' }}, médecin de l'Hôpital Al-Amine,
+            Je soussigné(e) {{ auth()->user()->nom_complet ?? 'Dr. __________________' }}, médecin d'Al-Amine RDV,
             certifie avoir examiné ce jour le(la) patient(e) susnommé(e).
         </p>
         <p class="body-text">
@@ -142,7 +142,7 @@
     </div>
 
     <div class="footer">
-        Hôpital Al-Amine • Avenue Cheikh Anta Diop • Dakar • Tél. +221 33 123 45 67 • www.hopital-alamine.sn
+        Al-Amine RDV • Avenue Cheikh Anta Diop • Dakar • Tél. +221 33 123 45 67 • www.al-amine-rdv.sn
     </div>
 </body>
 </html>
