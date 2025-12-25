@@ -86,7 +86,7 @@
             height: 52px;
             border-radius: 12px;
             object-fit: cover;
-
+            
         }
 
         .logo-text {
@@ -147,7 +147,7 @@
             font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-
+            
             text-decoration: none;
             display: inline-block;
             position: relative;
@@ -2043,7 +2043,7 @@
             text-decoration: none;
             font-size: 0.95rem;
             margin-bottom: 0.8rem;
-
+            
             padding-left: 0;
         }
 
@@ -2639,7 +2639,7 @@
             <h2 class="modal-title">Connexion</h2>
 
             @php
-                $loginError = session('authError') ?? (isset($errors) ? $errors->first('email') : null);
+                $loginError = session('authError') ?? $errors->first('email');
             @endphp
 
             @if($loginError)
