@@ -29,7 +29,15 @@ jobs:
           node-version: '18'
 
       - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader --prefer-dist
+        run: composer install --no-dev --optimize-autoloader --prefer-dist --no-scripts
+
+      - name: Generate autoload files
+        run: composer dump-autoload --optimize
+        env:
+          BROADCAST_CONNECTION: log
+          REVERB_APP_KEY: placeholder
+          REVERB_APP_SECRET: placeholder
+          REVERB_APP_ID: placeholder
 
       - name: Install NPM dependencies
         run: npm install
