@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Al-Amine - Système de Gestion de Rendez-vous Médicaux</title>
+    <title>Al-Amine RDV - Système de Gestion de Rendez-vous Médicaux</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700,800&display=swap" rel="stylesheet" />
     <style>
@@ -50,6 +50,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 1.2rem 4rem;
+            height: 80px;
             background: rgba(3, 30, 93, 0.63);
             backdrop-filter: blur(16px) saturate(1.05);
             -webkit-backdrop-filter: blur(16px) saturate(1.05);
@@ -2287,8 +2288,7 @@
     <!-- Navigation -->
     <nav>
         <div class="logo">
-            <img src="{{ asset('photos/b9d47d611bf6c652139b2517abae1d9f.png') }}" alt="Logo Al-Amine" class="logo-img">
-            <span class="logo-text">Al-Amine</span>
+            <img src="{{ asset('photos/logoalmine.png') }}" alt="Al-Amine RDV" class="logo-img" style="width: 180px; height: auto; border-radius: 0;">
         </div>
         <div class="nav-links">
             <a href="#home">Accueil</a>
@@ -2333,7 +2333,7 @@
                     <span style="top: 78%; left: 60%; animation-delay: 6s"></span>
                     <span style="top: 46%; left: 84%; animation-delay: 8s"></span>
                 </div>
-                <img src="{{ asset('photos/doctorgeneraliste.png') }}" alt="Docteur Professionnel Al-Amine">
+                <img src="{{ asset('photos/doctorgeneraliste.png') }}" alt="Docteur Professionnel Al-Amine RDV">
             </div>
         </div>
     </section>
@@ -2372,7 +2372,7 @@
             <div>
                 <div class="section-badge">Nos Chiffres Clés</div>
                 <h2 class="section-heading">La plateforme de soins qui connecte vos besoins aux meilleurs spécialistes</h2>
-                <p class="section-desc">Al-Amine orchestre chaque étape de votre parcours de soins : tri intelligent des spécialistes, préparation des consultations, suivi post-visite et notifications personnalisées pour garantir un accompagnement continu.</p>
+                <p class="section-desc">Al-Amine RDV orchestre chaque étape de votre parcours de soins : tri intelligent des spécialistes, préparation des consultations, suivi post-visite et notifications personnalisées pour garantir un accompagnement continu.</p>
                 <div class="stats-grid">
                     <div class="stat-box">
                         <div class="stat-number">23+</div>
@@ -2465,7 +2465,7 @@
                 <div class="section-header-text">
                     <div class="section-badge">Nos Services</div>
                     <h2 class="section-heading">Un écosystème de services médicaux piloté par la data</h2>
-                    <p class="section-desc">Chaque service Al-Amine est conçu pour fluidifier votre parcours de santé : automatisation des démarches, suivi en temps réel, coordination des équipes et sécurité des données.</p>
+                    <p class="section-desc">Chaque service Al-Amine RDV est conçu pour fluidifier votre parcours de santé : automatisation des démarches, suivi en temps réel, coordination des équipes et sécurité des données.</p>
                 </div>
                 <div class="section-actions">
                     <button class="btn-secondary" onclick="openLoginModal()">
@@ -2554,7 +2554,7 @@
                 <div class="section-header-text">
                     <div class="section-badge">Témoignages</div>
                     <h2 class="section-heading">Ils nous confient leur santé, voici leurs retours</h2>
-                    <p class="section-desc">Patients, praticiens et partenaires partagent leur expérience de la plateforme Al-Amine.</p>
+                    <p class="section-desc">Patients, praticiens et partenaires partagent leur expérience de la plateforme Al-Amine RDV.</p>
                 </div>
             </div>
 
@@ -2579,7 +2579,7 @@
             <div class="testimonials-slider">
                 <div class="testimonial-track" id="testimonialTrack">
                     <div class="testimonial-card">
-                        <p>« Grâce à Al-Amine, j'ai planifié tous mes suivis de grossesse sans appeler une seule fois. Les notifications et la téléconsultation m'ont fait gagner un temps précieux. »</p>
+                        <p>« Grâce à Al-Amine RDV, j'ai planifié tous mes suivis de grossesse sans appeler une seule fois. Les notifications et la téléconsultation m'ont fait gagner un temps précieux. »</p>
                         <div class="testimonial-author">
                             <img src="https://i.pravatar.cc/100?img=12" alt="Awa Diop">
                             <div>
@@ -2594,7 +2594,7 @@
                             <img src="https://i.pravatar.cc/100?img=5" alt="Dr Mamadou Ndiaye">
                             <div>
                                 <strong>Dr Mamadou Ndiaye</strong>
-                                <div style="color: var(--gray); font-size: 0.9rem;">Chirurgien, Hôpital Al-Amine</div>
+                                <div style="color: var(--gray); font-size: 0.9rem;">Chirurgien, Hôpital Al-Amine RDV</div>
                             </div>
                         </div>
                     </div>
@@ -2636,7 +2636,7 @@
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <button class="close-btn" onclick="closeLoginModal()">&times;</button>
-            <h2 class="modal-title">Connexion Patient</h2>
+            <h2 class="modal-title">Connexion</h2>
 
             @php
                 $loginError = session('authError') ?? $errors->first('email');
@@ -2772,7 +2772,7 @@
     <footer id="contact">
         <div class="footer-content">
             <div class="footer-col">
-                <h4>Al-Amine</h4>
+                <h4>Al-Amine RDV</h4>
                 <p style="color: #e0e0e0; font-size: 0.9rem; line-height: 1.6;">Fournisseur de soins de santé de premier plan engagé à offrir l'excellence dans les soins médicaux et la satisfaction des patients.</p>
             </div>
             <div class="footer-col">
@@ -2797,7 +2797,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 Al-Amine - Système de Gestion de Rendez-vous Médicaux. Tous droits réservés. | <a href="#">Conditions d'Utilisation</a> | <a href="#">Politique de Confidentialité</a></p>
+            <p>&copy; 2025 Al-Amine RDV - Système de Gestion de Rendez-vous Médicaux. Tous droits réservés. | <a href="#">Conditions d'Utilisation</a> | <a href="#">Politique de Confidentialité</a></p>
         </div>
     </footer>
 
